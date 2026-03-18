@@ -20,7 +20,7 @@
       --gold-tertiary: #b38728;
       --dark-bg: #0a0a0a;
       --glass-bg: rgba(18, 18, 18, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.12);
     }
 
     * {
@@ -34,39 +34,41 @@
       font-family: 'Plus Jakarta Sans', sans-serif; 
       background: var(--dark-bg);
       color: #fff;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Background Layer */
     .app-viewport {
       position: relative;
       width: 100%;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
-      overflow: hidden;
+      flex-direction: column;
+      overflow-x: hidden;
     }
 
     .background-engine {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url('fundo.png');
+      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000&auto=format&fit=crop');
       background-size: cover;
       background-position: center;
       z-index: -1;
-      transform: scale(1.1);
-      filter: blur(2px);
+      transform: scale(1.05);
+      filter: blur(1px);
     }
 
-    /* Auth Interface Components */
+    /* Auth Interface - Fully Responsive Card */
     .auth-container {
       width: 100%;
-      max-width: 520px;
-      padding: 60px;
+      max-width: 540px;
+      margin: auto;
+      padding: clamp(2rem, 5vw, 4rem);
       background: rgba(15, 15, 15, 0.65);
       backdrop-filter: blur(40px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 50px;
+      border: 1px solid var(--glass-border);
+      border-radius: clamp(1.5rem, 4vw, 3.5rem);
       box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(191, 149, 63, 0.05);
       transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
@@ -78,11 +80,6 @@
       display: inline-block;
     }
 
-    .input-wrapper {
-      position: relative;
-      margin-bottom: 24px;
-    }
-
     .input-label {
       display: block;
       font-size: 10px;
@@ -90,16 +87,16 @@
       color: rgba(255, 255, 255, 0.4);
       text-transform: uppercase;
       letter-spacing: 0.2em;
-      margin-bottom: 10px;
-      margin-left: 6px;
+      margin-bottom: 8px;
+      margin-left: 4px;
     }
 
     .modern-input {
       width: 100%;
       background: rgba(255, 255, 255, 0.04);
       border: 1.5px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 18px 24px;
+      border-radius: 18px;
+      padding: 16px 20px;
       color: #fff;
       font-size: 15px;
       font-weight: 500;
@@ -116,31 +113,26 @@
     .btn-gold-action {
       position: relative;
       width: 100%;
-      padding: 20px;
+      padding: 18px;
       background: linear-gradient(180deg, var(--gold-secondary) 0%, var(--gold-primary) 100%);
       border: none;
       border-radius: 50px;
       color: #000;
       font-weight: 800;
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.15em;
       cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .btn-gold-action:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 15px 30px rgba(191, 149, 63, 0.4);
-    }
-
-    .btn-gold-action:active {
-      transform: translateY(0);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(191, 149, 63, 0.35);
     }
 
     /* Dashboard UI Elements */
@@ -148,16 +140,15 @@
       background: var(--glass-bg);
       backdrop-filter: blur(30px);
       border: 1px solid var(--glass-border);
-      border-radius: 35px;
-      transition: all 0.3s ease;
+      border-radius: 30px;
     }
 
     .nav-link {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 16px 24px;
-      border-radius: 20px;
+      gap: 14px;
+      padding: 14px 20px;
+      border-radius: 18px;
       color: #64748b;
       font-size: 11px;
       font-weight: 700;
@@ -172,28 +163,23 @@
       color: var(--gold-secondary);
     }
 
-    .nav-link:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
-    }
-
     /* Animations */
     .reveal {
-      animation: revealAnim 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+      animation: revealAnim 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     }
 
     @keyframes revealAnim {
-      from { opacity: 0; transform: translateY(30px); filter: blur(10px); }
+      from { opacity: 0; transform: translateY(20px); filter: blur(5px); }
       to { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
 
-    /* Custom Scrollbar */
     .custom-scroll::-webkit-scrollbar { width: 4px; }
-    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.3); border-radius: 10px; }
 
-    /* Icons and Utils */
-    ion-icon { vertical-align: middle; }
+    @media (max-width: 768px) {
+      .sidebar-collapsed { display: none; }
+      .mobile-nav-toggle { display: block; }
+    }
   </style>
 </head>
 <body>
@@ -203,23 +189,14 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      // States
       const [isLoggedIn, setIsLoggedIn] = useState(false);
       const [authView, setAuthView] = useState('login'); // login | signup
       const [loading, setLoading] = useState(false);
       const [activeTab, setActiveTab] = useState('dashboard');
       const [transactions, setTransactions] = useState([]);
       const [showModal, setShowModal] = useState(null);
-      
-      // User Context
-      const [userData, setUserData] = useState({
-        firstName: 'Luis',
-        lastName: 'Campos',
-        email: 'luis.campos@moneyforge.pro',
-        plan: 'Black Edition'
-      });
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-      // Initialization
       useEffect(() => {
         const initialData = [
           { id: 1, desc: 'Assinatura Adobe Creative', val: 124.90, type: 'expense', cat: 'Design', date: '18/03/2024' },
@@ -233,7 +210,6 @@
       const handleAuth = (e) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate detailed auth process
         setTimeout(() => {
           setIsLoggedIn(true);
           setLoading(false);
@@ -245,86 +221,89 @@
         setAuthView('login');
       };
 
-      // Component Logic
       const dashboardStats = useMemo(() => {
         const income = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.val, 0);
         const expense = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.val, 0);
         return { total: income - expense, income, expense };
       }, [transactions]);
 
-      // Views
+      // --- AUTH VIEW ---
       if (!isLoggedIn) {
         return (
-          <div className="app-viewport flex items-center justify-center p-6 h-screen overflow-hidden">
+          <div className="app-viewport flex items-center justify-center p-4 sm:p-6 lg:p-10">
             <div className="background-engine"></div>
             
             <div className="auth-container reveal">
-              <div className="text-center mb-16">
-                <h1 className="text-5xl font-extrabold tracking-tighter mb-4 italic">
+              <div className="text-center mb-10 sm:mb-14">
+                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tighter mb-4 italic">
                   Money<span className="gold-gradient-text">Forge</span>
                 </h1>
                 <div className="flex items-center justify-center gap-2">
-                  <div className="h-[1px] w-8 bg-white/10"></div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">
-                    SISTEMA DE GESTÃO PATRIMONIAL
+                  <div className="h-[1px] w-6 sm:w-10 bg-white/10"></div>
+                  <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+                    GESTÃO PATRIMONIAL ELITE
                   </span>
-                  <div className="h-[1px] w-8 bg-white/10"></div>
+                  <div className="h-[1px] w-6 sm:w-10 bg-white/10"></div>
                 </div>
               </div>
 
-              <form onSubmit={handleAuth} className="space-y-4">
+              <form onSubmit={handleAuth} className="space-y-4 sm:space-y-5">
                 {authView === 'signup' && (
-                  <div className="grid grid-cols-2 gap-4 reveal">
-                    <div className="input-wrapper">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 reveal">
+                    <div>
                       <label className="input-label">Nome</label>
-                      <input type="text" className="modern-input" placeholder="Luis" required />
+                      <input type="text" className="modern-input" placeholder="Ex: Luis" required />
                     </div>
-                    <div className="input-wrapper">
+                    <div>
                       <label className="input-label">Sobrenome</label>
-                      <input type="text" className="modern-input" placeholder="Campos" required />
+                      <input type="text" className="modern-input" placeholder="Ex: Campos" required />
                     </div>
                   </div>
                 )}
 
-                <div className="input-wrapper">
-                  <label className="input-label">Endereço de E-mail</label>
-                  <input type="email" className="modern-input" placeholder="exemplo@dominio.com" required />
+                <div>
+                  <label className="input-label">E-mail Corporativo</label>
+                  <input type="email" className="modern-input" placeholder="seu@email.com" required />
                 </div>
 
-                <div className="input-wrapper">
+                <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="input-label mb-0">Senha de Acesso</label>
-                    {authView === 'login' && <span className="text-[9px] font-bold text-white/30 cursor-pointer hover:text-white transition-colors">Esqueceu a senha?</span>}
+                    <label className="input-label mb-0">Senha de Segurança</label>
+                    {authView === 'login' && (
+                      <span className="text-[9px] font-bold text-white/30 cursor-pointer hover:text-white transition-colors">
+                        Esqueceu?
+                      </span>
+                    )}
                   </div>
                   <div className="relative">
                     <input type="password" className="modern-input" placeholder="••••••••" required />
-                    <button type="button" className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white transition-colors">
+                    <button type="button" className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white">
                       <ion-icon name="eye-outline"></ion-icon>
                     </button>
                   </div>
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-gold-action group mt-8">
+                <button type="submit" disabled={loading} className="btn-gold-action mt-6 sm:mt-10 group">
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
                   ) : (
                     <>
-                      <span>{authView === 'login' ? 'Autenticar no Sistema' : 'Criar Conta Premium'}</span>
-                      <ion-icon name="chevron-forward-outline" class="group-hover:translate-x-1 transition-transform"></ion-icon>
+                      <span>{authView === 'login' ? 'Entrar no Sistema' : 'Finalizar Registro Premium'}</span>
+                      <ion-icon name="arrow-forward" class="group-hover:translate-x-1 transition-transform"></ion-icon>
                     </>
                   )}
                 </button>
               </form>
 
-              <div className="mt-14 text-center">
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">
-                  {authView === 'login' ? 'Novo por aqui?' : 'Já possui acesso?'}
+              <div className="mt-12 sm:mt-16 text-center">
+                <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-3">
+                  {authView === 'login' ? 'Ainda não é membro?' : 'Já possui uma conta ativa?'}
                 </p>
                 <button 
                   onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
-                  className="gold-gradient-text text-[11px] font-black uppercase tracking-widest hover:opacity-80 transition-opacity"
+                  className="gold-gradient-text text-[10px] sm:text-[11px] font-black uppercase tracking-widest hover:brightness-125 transition-all"
                 >
-                  {authView === 'login' ? 'Inicie seu Cadastro Agora' : 'Voltar para o Login'}
+                  {authView === 'login' ? 'Solicitar Acesso Agora' : 'Voltar para o Login'}
                 </button>
               </div>
             </div>
@@ -332,136 +311,132 @@
         );
       }
 
+      // --- MAIN APP VIEW ---
       return (
-        <div className="app-viewport h-screen bg-[#050505] p-6 gap-6">
-          <div className="background-engine opacity-40"></div>
+        <div className="flex h-screen bg-[#050505] overflow-hidden p-0 md:p-6 gap-6">
+          <div className="background-engine opacity-30"></div>
           
-          {/* Sidebar Navigation */}
-          <aside className="w-80 h-full glass-panel flex flex-col p-8 reveal">
+          {/* Sidebar - Desktop Only */}
+          <aside className="hidden lg:flex w-80 h-full glass-panel flex-col p-8 reveal">
             <div className="mb-12">
               <h2 className="text-2xl font-black italic tracking-tighter">Money<span className="gold-gradient-text">Forge</span></h2>
               <p className="text-[9px] text-white/20 font-bold uppercase tracking-[0.2em] mt-1">Intelligence Division</p>
             </div>
 
-            <nav className="flex-1 space-y-2 overflow-y-auto custom-scroll pr-2">
-              <NavHeader title="Gestão de Ativos" />
+            <nav className="flex-1 space-y-1 overflow-y-auto custom-scroll">
+              <NavHeader title="Menu Principal" />
               <NavLink label="Dashboard" icon="grid-outline" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
               <NavLink label="Fluxo de Caixa" icon="swap-horizontal-outline" active={activeTab === 'transactions'} onClick={() => setActiveTab('transactions')} />
               
-              <NavHeader title="Planejamento" />
-              <NavLink label="Investimentos" icon="trending-up-outline" active={activeTab === 'investments'} onClick={() => setActiveTab('investments')} />
-              <NavLink label="Metas Financeiras" icon="flag-outline" active={activeTab === 'goals'} onClick={() => setActiveTab('goals')} />
+              <NavHeader title="Estratégico" />
+              <NavLink label="Patrimônio" icon="trending-up-outline" active={activeTab === 'investments'} onClick={() => setActiveTab('investments')} />
+              <NavLink label="Planejamento" icon="flag-outline" active={activeTab === 'goals'} onClick={() => setActiveTab('goals')} />
               
-              <NavHeader title="Preferências" />
-              <NavLink label="Minha Assinatura" icon="diamond-outline" active={activeTab === 'billing'} onClick={() => setActiveTab('billing')} />
+              <NavHeader title="Sistema" />
               <NavLink label="Configurações" icon="settings-outline" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
             </nav>
 
             <div className="mt-8 pt-6 border-t border-white/5">
               <button 
                 onClick={handleLogout}
-                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl bg-red-500/5 hover:bg-red-500/10 text-red-500 transition-all text-[11px] font-black uppercase tracking-widest"
+                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl hover:bg-red-500/10 text-red-500 transition-all text-[11px] font-black uppercase tracking-widest"
               >
-                <ion-icon name="log-out-outline" style={{fontSize: '20px'}}></ion-icon> Finalizar Sessão
+                <ion-icon name="power-outline"></ion-icon> Desconectar
               </button>
             </div>
           </aside>
 
-          {/* Main Content Area */}
-          <main className="flex-1 flex flex-col gap-6 h-full">
-            <header className="w-full glass-panel p-6 flex justify-between items-center reveal">
-              <div className="flex items-center gap-5">
-                <div className="w-14 h-14 rounded-2xl btn-gold-action !w-14 !p-0 shadow-lg text-lg">LC</div>
+          {/* Main Content */}
+          <main className="flex-1 flex flex-col gap-4 sm:gap-6 h-full p-4 md:p-0 overflow-y-auto custom-scroll">
+            <header className="glass-panel p-5 sm:p-6 flex justify-between items-center reveal shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl btn-gold-action !w-12 !p-0 hidden sm:flex">LC</div>
                 <div>
-                  <h3 className="font-bold text-lg tracking-tight">Status: <span className="gold-gradient-text">Premium Account</span></h3>
-                  <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Seja bem-vindo, {userData.firstName} {userData.lastName}</p>
+                  <h3 className="font-bold text-sm sm:text-base tracking-tight"><span className="hidden sm:inline">Bem-vindo, </span>{userData.firstName}</h3>
+                  <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">{userData.plan}</p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <button className="glass-panel px-6 py-3 border-white/5 hover:bg-white/5 transition-all text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
-                  <ion-icon name="notifications-outline" style={{fontSize: '18px'}}></ion-icon> Alertas
+              <div className="flex gap-2 sm:gap-4">
+                <button onClick={() => setShowModal('tx')} className="btn-gold-action !py-2 sm:!py-3 px-4 sm:px-6 text-[9px] sm:text-[10px]">
+                  <ion-icon name="add"></ion-icon> <span className="hidden sm:inline">Lançar</span>
                 </button>
-                <button 
-                  onClick={() => setShowModal('tx')}
-                  className="btn-gold-action !py-3 px-8 text-[10px]"
-                >
-                  <ion-icon name="add-outline"></ion-icon> Novo Lançamento
+                <button onClick={handleLogout} className="glass-panel lg:hidden p-3 text-red-500 border-none">
+                  <ion-icon name="log-out-outline" style={{fontSize: '20px'}}></ion-icon>
                 </button>
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto custom-scroll pr-2 space-y-6">
-              {activeTab === 'dashboard' && <DashboardView stats={dashboardStats} transactions={transactions} />}
-              {activeTab === 'transactions' && <TransactionsView transactions={transactions} />}
-              {activeTab !== 'dashboard' && activeTab !== 'transactions' && <PlaceholderView tab={activeTab} />}
+            <div className="flex-1 space-y-6">
+              {activeTab === 'dashboard' ? (
+                <DashboardView stats={dashboardStats} transactions={transactions} />
+              ) : (
+                <TransactionsView transactions={transactions} />
+              )}
             </div>
           </main>
 
-          {showModal === 'tx' && <NewTransactionModal onClose={() => setShowModal(null)} onSave={(t) => {setTransactions([t, ...transactions]); setShowModal(null);}} />}
+          {showModal === 'tx' && (
+            <NewTransactionModal 
+              onClose={() => setShowModal(null)} 
+              onSave={(t) => {setTransactions([t, ...transactions]); setShowModal(null);}} 
+            />
+          )}
         </div>
       );
     };
 
     // Sub-Components
     const NavHeader = ({ title }) => (
-      <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-4 ml-4">{title}</p>
+      <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">{title}</p>
     );
 
     const NavLink = ({ label, icon, active, onClick }) => (
       <div onClick={onClick} className={`nav-link ${active ? 'active' : ''}`}>
-        <ion-icon name={icon} style={{fontSize: '20px'}}></ion-icon>
+        <ion-icon name={icon} style={{fontSize: '18px'}}></ion-icon>
         <span>{label}</span>
       </div>
     );
 
     const DashboardView = ({ stats, transactions }) => (
-      <div className="space-y-6 reveal">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatPanel title="Capital Disponível" value={stats.total} icon="wallet-outline" color="text-white" trend="+5.2%" />
-          <StatPanel title="Proventos Acumulados" value={stats.income} icon="trending-up-outline" color="text-emerald-500" trend="+12%" />
-          <StatPanel title="Despesas Correntes" value={stats.expense} icon="trending-down-outline" color="text-red-500" trend="-3.5%" />
+      <div className="space-y-6 reveal pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <StatPanel title="Disponível" value={stats.total} icon="wallet-outline" color="text-white" trend="+3.2%" />
+          <StatPanel title="Proventos" value={stats.income} icon="arrow-up-circle-outline" color="text-emerald-500" trend="+8.4%" />
+          <StatPanel title="Despesas" value={stats.expense} icon="arrow-down-circle-outline" color="text-red-500" trend="-1.2%" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3 glass-panel p-10 h-[450px]">
-            <div className="flex justify-between items-center mb-10">
-              <h4 className="text-[11px] font-black uppercase tracking-widest text-white/30 italic">Performance Trimestral</h4>
-              <div className="flex gap-2">
-                {['MÊS', 'TRIM', 'ANO'].map(p => <button key={p} className="px-3 py-1 bg-white/5 rounded text-[9px] font-bold text-white/40 hover:text-white">{p}</button>)}
-              </div>
-            </div>
-            <ChartComponent />
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          <div className="xl:col-span-3 glass-panel p-6 sm:p-10 min-h-[350px]">
+             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-8">Fluxo Semestral</h4>
+             <ChartComponent />
           </div>
-          
-          <div className="lg:col-span-2 glass-panel p-10 h-[450px] flex flex-col">
-            <h4 className="text-[11px] font-black uppercase tracking-widest text-white/30 italic mb-10">Metas de Longo Prazo</h4>
-            <div className="flex-1 space-y-10">
-              <GoalItem label="Independência Financeira" progress={65} target="R$ 1.5M" color="bg-emerald-500" />
-              <GoalItem label="Novo Portfólio Imobiliário" progress={28} target="R$ 450k" color="bg-gold-primary" />
-              <GoalItem label="Reserva de Emergência" progress={92} target="R$ 80k" color="bg-blue-500" />
-            </div>
+          <div className="xl:col-span-2 glass-panel p-6 sm:p-10">
+             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-8">Objetivos Estratégicos</h4>
+             <div className="space-y-8">
+               <GoalItem label="Portfólio Global" progress={72} color="bg-gold-primary" />
+               <GoalItem label="Aposentadoria" progress={45} color="bg-blue-500" />
+               <GoalItem label="Reserva Offshore" progress={18} color="bg-emerald-500" />
+             </div>
           </div>
         </div>
 
-        <div className="glass-panel p-10">
-          <h4 className="text-[11px] font-black uppercase tracking-widest text-white/30 italic mb-8">Movimentações Recentes</h4>
-          <div className="space-y-4">
-            {transactions.slice(0, 5).map(t => (
-              <div key={t.id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/[0.04] transition-all">
-                <div className="flex items-center gap-5">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                    <ion-icon name={t.type === 'income' ? 'chevron-up-outline' : 'chevron-down-outline'}></ion-icon>
+        <div className="glass-panel p-6 sm:p-10">
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-6">Transações Recentes</h4>
+          <div className="space-y-3">
+            {transactions.map(t => (
+              <div key={t.id} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'income' ? 'text-emerald-500 bg-emerald-500/10' : 'text-white bg-white/5'}`}>
+                    <ion-icon name={t.type === 'income' ? 'add-outline' : 'remove-outline'}></ion-icon>
                   </div>
                   <div>
-                    <p className="font-bold text-sm tracking-tight">{t.desc}</p>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest">{t.cat} • {t.date}</p>
+                    <p className="font-bold text-xs">{t.desc}</p>
+                    <p className="text-[9px] text-white/20 font-black uppercase">{t.cat}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`font-black text-lg ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                    {t.type === 'income' ? '+' : '-'} R$ {t.val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
+                <p className={`font-black text-sm ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                  R$ {t.val.toLocaleString('pt-BR')}
+                </p>
               </div>
             ))}
           </div>
@@ -470,31 +445,26 @@
     );
 
     const StatPanel = ({ title, value, icon, color, trend }) => (
-      <div className="glass-panel p-8 group hover:border-gold-primary/30 transition-all cursor-default">
-        <div className="flex justify-between items-start mb-6">
-          <p className="text-[10px] text-white/40 font-black uppercase tracking-widest italic">{title}</p>
-          <div className={`text-2xl opacity-20 group-hover:opacity-100 transition-all ${color}`}>
-            <ion-icon name={icon}></ion-icon>
-          </div>
+      <div className="glass-panel p-6 sm:p-8 hover:border-gold-primary/30 transition-all">
+        <div className="flex justify-between items-start mb-4">
+          <p className="text-[9px] text-white/30 font-black uppercase tracking-[0.2em]">{title}</p>
+          <div className={`text-xl opacity-30 ${color}`}><ion-icon name={icon}></ion-icon></div>
         </div>
         <div className="flex items-end justify-between">
-          <h3 className="text-3xl font-black tracking-tighter">R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-          <span className={`text-[10px] font-black ${trend.startsWith('+') ? 'text-emerald-500' : 'text-red-500'}`}>{trend}</span>
+          <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">R$ {value.toLocaleString('pt-BR')}</h3>
+          <span className={`text-[9px] font-black px-2 py-0.5 rounded-full bg-white/5 ${trend.startsWith('+') ? 'text-emerald-500' : 'text-red-500'}`}>{trend}</span>
         </div>
       </div>
     );
 
-    const GoalItem = ({ label, progress, target, color }) => (
-      <div className="space-y-4">
-        <div className="flex justify-between items-end">
-          <div>
-            <p className="text-sm font-bold tracking-tight">{label}</p>
-            <p className="text-[9px] text-white/20 font-black uppercase tracking-widest">Alvo: {target}</p>
-          </div>
-          <span className="text-xs font-black text-white/40">{progress}%</span>
+    const GoalItem = ({ label, progress, color }) => (
+      <div className="space-y-3">
+        <div className="flex justify-between text-[11px] font-bold">
+          <span>{label}</span>
+          <span className="text-white/40">{progress}%</span>
         </div>
-        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-          <div className={`h-full ${color} rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-1000`} style={{width: `${progress}%`}}></div>
+        <div className="h-1 w-full bg-white/5 rounded-full">
+          <div className={`h-full ${color} rounded-full`} style={{width: `${progress}%`}}></div>
         </div>
       </div>
     );
@@ -503,113 +473,78 @@
       const chartRef = useRef(null);
       useEffect(() => {
         const ctx = chartRef.current.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(191, 149, 63, 0.2)');
-        gradient.addColorStop(1, 'rgba(191, 149, 63, 0)');
-
         const chart = new Chart(ctx, {
           type: 'line',
           data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            labels: ['1', '2', '3', '4', '5', '6'],
             datasets: [{
-              data: [35000, 42000, 38000, 52000, 48000, 65000],
+              data: [12, 19, 15, 25, 22, 30],
               borderColor: '#bf953f',
-              borderWidth: 4,
-              fill: true,
-              backgroundColor: gradient,
+              borderWidth: 3,
               tension: 0.4,
-              pointRadius: 0
+              pointRadius: 0,
+              fill: true,
+              backgroundColor: 'rgba(191, 149, 63, 0.05)'
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.2)', font: { size: 10, weight: 'bold' } } },
-              y: { display: false }
-            }
+            scales: { x: { display: false }, y: { display: false } }
           }
         });
         return () => chart.destroy();
       }, []);
-      return <div className="h-64"><canvas ref={chartRef}></canvas></div>;
+      return <div className="h-48 sm:h-64"><canvas ref={chartRef}></canvas></div>;
     };
 
     const TransactionsView = ({ transactions }) => (
-      <div className="glass-panel p-10 reveal">
-        <h3 className="text-2xl font-black italic tracking-tighter mb-10">Extrato <span className="gold-gradient-text">Consolidado</span></h3>
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-white/5 text-left">
-              <th className="pb-6 text-[10px] font-black uppercase tracking-widest text-white/20">Identificação</th>
-              <th className="pb-6 text-[10px] font-black uppercase tracking-widest text-white/20">Data</th>
-              <th className="pb-6 text-[10px] font-black uppercase tracking-widest text-white/20">Categoria</th>
-              <th className="pb-6 text-right text-[10px] font-black uppercase tracking-widest text-white/20">Valor Líquido</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {transactions.map(t => (
-              <tr key={t.id} className="group hover:bg-white/[0.02] transition-colors">
-                <td className="py-6 font-bold text-sm">{t.desc}</td>
-                <td className="py-6 text-sm text-white/40">{t.date}</td>
-                <td className="py-6">
-                  <span className="px-4 py-1.5 bg-white/5 rounded-full text-[9px] font-black uppercase text-white/40 tracking-widest">
-                    {t.cat}
-                  </span>
-                </td>
-                <td className={`py-6 text-right font-black text-lg ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                  {t.type === 'income' ? '+' : '-'} R$ {t.val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </td>
+      <div className="glass-panel p-6 sm:p-10 reveal">
+        <h3 className="text-xl font-black italic tracking-tighter mb-8 italic">Histórico de <span className="gold-gradient-text">Movimentações</span></h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[500px]">
+            <thead>
+              <tr className="border-b border-white/5 text-[10px] uppercase font-black tracking-widest text-white/20">
+                <th className="pb-4">Descrição</th>
+                <th className="pb-4">Categoria</th>
+                <th className="pb-4">Data</th>
+                <th className="pb-4 text-right">Valor</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-
-    const PlaceholderView = ({ tab }) => (
-      <div className="glass-panel p-20 flex flex-col items-center justify-center text-center reveal">
-        <div className="w-32 h-32 rounded-full bg-white/5 flex items-center justify-center text-4xl text-gold-primary mb-8 border border-white/10">
-          <ion-icon name="construct-outline"></ion-icon>
+            </thead>
+            <tbody className="divide-y divide-white/5 text-xs">
+              {transactions.map(t => (
+                <tr key={t.id} className="hover:bg-white/[0.02]">
+                  <td className="py-4 font-bold">{t.desc}</td>
+                  <td className="py-4"><span className="bg-white/5 px-3 py-1 rounded-full text-[9px] uppercase">{t.cat}</span></td>
+                  <td className="py-4 text-white/30">{t.date}</td>
+                  <td className={`py-4 text-right font-black ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                    {t.type === 'income' ? '+' : '-'} R$ {t.val.toLocaleString('pt-BR')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <h3 className="text-2xl font-black italic mb-4 uppercase tracking-widest">Módulo em <span className="gold-gradient-text">Desenvolvimento</span></h3>
-        <p className="max-w-md text-white/30 text-sm font-medium leading-relaxed">
-          A seção de <b>{tab.toUpperCase()}</b> está sendo otimizada para fornecer a melhor experiência de análise preditiva do mercado.
-        </p>
       </div>
     );
 
     const NewTransactionModal = ({ onClose, onSave }) => {
       const [f, setF] = useState({ desc: '', val: '', type: 'expense', cat: 'Geral' });
       return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md" onClick={onClose}>
-          <div className="auth-container !max-w-md !p-12 reveal" onClick={e => e.stopPropagation()}>
-            <h3 className="text-2xl font-black italic mb-10 tracking-tighter">Registrar <span className="gold-gradient-text">Transação</span></h3>
-            <div className="space-y-6">
-              <div className="input-wrapper">
-                <label className="input-label">Descrição do Lançamento</label>
-                <input type="text" className="modern-input" placeholder="Ex: Jantar de Negócios" value={f.desc} onChange={e => setF({...f, desc: e.target.value})} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+          <div className="auth-container !max-w-md !p-8 sm:!p-12 reveal" onClick={e => e.stopPropagation()}>
+            <h3 className="text-xl font-black italic mb-8 tracking-tighter">Novo <span className="gold-gradient-text">Registro</span></h3>
+            <div className="space-y-4">
+              <input type="text" className="modern-input" placeholder="O que foi?" value={f.desc} onChange={e => setF({...f, desc: e.target.value})} />
+              <div className="grid grid-cols-2 gap-3">
+                <input type="number" className="modern-input" placeholder="Valor" value={f.val} onChange={e => setF({...f, val: e.target.value})} />
+                <select className="modern-input" value={f.type} onChange={e => setF({...f, type: e.target.value})}>
+                  <option value="expense">Saída</option>
+                  <option value="income">Entrada</option>
+                </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="input-wrapper">
-                  <label className="input-label">Valor (R$)</label>
-                  <input type="number" className="modern-input" placeholder="0,00" value={f.val} onChange={e => setF({...f, val: e.target.value})} />
-                </div>
-                <div className="input-wrapper">
-                  <label className="input-label">Fluxo</label>
-                  <select className="modern-input" value={f.type} onChange={e => setF({...f, type: e.target.value})}>
-                    <option value="expense">Saída (-)</option>
-                    <option value="income">Entrada (+)</option>
-                  </select>
-                </div>
-              </div>
-              <button 
-                className="btn-gold-action"
-                onClick={() => onSave({ ...f, val: parseFloat(f.val), id: Date.now(), date: new Date().toLocaleDateString('pt-BR') })}
-              >
-                Efetivar Lançamento
-              </button>
+              <button className="btn-gold-action" onClick={() => onSave({ ...f, val: parseFloat(f.val), id: Date.now(), date: '18/03/24' })}>Confirmar</button>
             </div>
           </div>
         </div>
