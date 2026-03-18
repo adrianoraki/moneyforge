@@ -10,7 +10,6 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
@@ -22,10 +21,40 @@
 
     body { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
-      background: #050505; color: white; margin: 0; overflow: hidden;
+      margin: 0; 
+      overflow: hidden;
+      background: #050505;
+      color: white;
     }
 
-    .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    /* Background Fixo e Unificado */
+    .app-bg-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 20% 30%, #111 0%, #050505 100%);
+      z-index: -1;
+    }
+
+    .bg-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(191, 149, 63, 0.08) 0%, rgba(0,0,0,0) 70%);
+      border-radius: 50%;
+      filter: blur(80px);
+      animation: float 25s infinite alternate ease-in-out;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(50px, 30px) scale(1.1); }
+      100% { transform: translate(-30px, 60px) scale(1); }
+    }
+
+    .glass { 
+      background: rgba(255, 255, 255, 0.03); 
+      backdrop-filter: blur(30px); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+    }
     
     .gold-text {
       background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
@@ -35,20 +64,20 @@
 
     .btn-gold {
       background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
-      color: #000; font-weight: 800; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: #000 !important; font-weight: 800; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(191, 149, 63, 0.3); }
 
     .nav-item { color: #94a3b8; transition: 0.2s; cursor: pointer; border-radius: 16px; font-size: 0.8rem; font-weight: 600; }
-    .nav-item.active { background: rgba(191, 149, 63, 0.1); color: #facc15; }
+    .nav-item.active { background: rgba(191, 149, 63, 0.1); color: #facc15; border-left: 3px solid #bf953f; }
 
     .scroll-hide::-webkit-scrollbar { width: 4px; }
     .scroll-hide::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.2); border-radius: 10px; }
 
-    .card-debt { background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); }
-    
-    .fade-in { animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
   </style>
 </head>
 <body>
@@ -58,68 +87,130 @@
     const { useState, useEffect, useRef } = React;
 
     const App = () => {
-      const [user, setUser] = useState({ email: 'usuario@moneyforge.pro', id: '123' }); // Mock para visualização imediata
+      const [isLoggedIn, setIsLoggedIn] = useState(false);
       const [activeTab, setActiveTab] = useState('dashboard');
       const [sidebar, setSidebar] = useState(false);
-      const [currency, setCurrency] = useState('€');
+      const [theme, setTheme] = useState('Deep Black');
+      const currency = 'R$';
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        setIsLoggedIn(true);
+      };
+
+      const handleLogout = () => {
+        setIsLoggedIn(false);
+        setActiveTab('dashboard');
+        setSidebar(false);
+      };
 
       return (
-        <div className="flex h-screen w-full bg-[#050505]">
-          {/* Sidebar Lateral */}
-          <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass p-8 transition-transform duration-300 ${sidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-            <div className="flex items-center justify-between mb-12">
-              <h1 className="text-2xl font-black italic tracking-tighter">Money<span className="gold-text">Forge</span></h1>
-              <button onClick={() => setSidebar(false)} className="lg:hidden text-2xl text-gray-500"><ion-icon name="close-outline"></ion-icon></button>
-            </div>
+        <div className={`relative min-h-screen w-full transition-colors duration-500 ${theme === 'Modern Light' ? 'bg-gray-100 text-black' : 'text-white'}`}>
+          {/* Background Persistente para toda a aplicação */}
+          <div className="app-bg-container">
+            <div className="bg-glow" style={{top: '10%', left: '5%'}}></div>
+            <div className="bg-glow" style={{bottom: '10%', right: '5%', animationDelay: '-7s'}}></div>
+          </div>
 
-            <nav className="space-y-1 overflow-y-auto scroll-hide h-[calc(100vh-200px)]">
-              <SectionTitle title="Principal" />
-              <NavItem icon="grid-outline" label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-              <NavItem icon="analytics-outline" label="Gráficos & Tendências" active={activeTab === 'charts'} onClick={() => setActiveTab('charts')} />
-              
-              <SectionTitle title="Gestão Inteligente" />
-              <NavItem icon="repeat-outline" label="Assinaturas / Recorrentes" active={activeTab === 'subs'} onClick={() => setActiveTab('subs')} />
-              <NavItem icon="wallet-outline" label="Dívidas & Empréstimos" active={activeTab === 'debts'} onClick={() => setActiveTab('debts')} />
-              <NavItem icon="calendar-number-outline" label="Planejamento" active={activeTab === 'plan'} onClick={() => setActiveTab('plan')} />
-              
-              <SectionTitle title="Configurações" />
-              <NavItem icon="settings-outline" label="Definições" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
-            </nav>
-
-            <div className="absolute bottom-8 left-8 right-8">
-               <button className="flex items-center gap-3 text-red-400 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity">
-                  <ion-icon name="log-out-outline" style={{fontSize: '18px'}}></ion-icon> Sair do Sistema
-               </button>
-            </div>
-          </aside>
-
-          {/* Área Principal */}
-          <main className="flex-1 flex flex-col overflow-hidden relative">
-            <header className="p-8 flex justify-between items-center bg-[#050505]/80 backdrop-blur-md z-10">
-              <button onClick={() => setSidebar(true)} className="lg:hidden p-2 glass rounded-xl"><ion-icon name="menu-outline" size="large"></ion-icon></button>
-              <div className="hidden sm:block">
-                <h2 className="text-xl font-bold italic capitalize">{activeTab.replace('dashboard', 'Visão Geral').replace('subs', 'Assinaturas').replace('plan', 'Planejamento')}</h2>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none">Status</p>
-                  <p className="text-xs font-bold text-emerald-400">Usuário Pro</p>
+          {!isLoggedIn ? (
+            /* Tela de Login */
+            <div className="h-screen flex items-center justify-center p-6 fade-in">
+              <div className="glass p-10 rounded-[3.5rem] w-full max-w-md relative z-10 shadow-2xl">
+                <div className="text-center mb-10">
+                  <h1 className="text-4xl font-black gold-text italic mb-2 tracking-tighter">MoneyForge</h1>
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em]">Exclusividade & Inteligência</p>
                 </div>
-                <div className="w-10 h-10 rounded-2xl btn-gold flex items-center justify-center text-sm">JS</div>
-              </div>
-            </header>
 
-            <section className="flex-1 overflow-y-auto p-8 lg:px-16 scroll-hide pb-20">
-              <div className="max-w-5xl mx-auto fade-in">
-                {activeTab === 'dashboard' && <Dashboard currency={currency} />}
-                {activeTab === 'charts' && <ChartsView currency={currency} />}
-                {activeTab === 'subs' && <SubscriptionsView currency={currency} />}
-                {activeTab === 'debts' && <DebtsView currency={currency} />}
-                {activeTab === 'plan' && <PlanningView currency={currency} />}
-                {activeTab === 'settings' && <SettingsView currency={currency} setCurrency={setCurrency} user={user} />}
+                <form onSubmit={handleLogin} className="space-y-6">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Credencial</label>
+                    <input type="email" required className="w-full p-4 rounded-2xl mt-1 focus:outline-none focus:border-yellow-500/50 transition-all text-sm" placeholder="seu@email.com" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Código Seguro</label>
+                    <input type="password" required className="w-full p-4 rounded-2xl mt-1 focus:outline-none focus:border-yellow-500/50 transition-all text-sm" placeholder="••••••••" />
+                  </div>
+                  <button type="submit" className="w-full btn-gold py-5 rounded-2xl mt-4 text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-gold/10">Aceder ao Cofre</button>
+                </form>
+
+                <div className="mt-8 text-center">
+                  <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Acesso restrito a convidados</p>
+                </div>
               </div>
-            </section>
-          </main>
+            </div>
+          ) : (
+            /* Layout Principal Logado */
+            <div className="flex h-screen w-full">
+              {/* Sidebar */}
+              <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass p-8 transition-transform duration-300 ${sidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+                <div className="flex items-center justify-between mb-12">
+                  <h1 className="text-2xl font-black italic tracking-tighter">Money<span className="gold-text">Forge</span></h1>
+                  <button onClick={() => setSidebar(false)} className="lg:hidden text-2xl text-gray-500"><ion-icon name="close-outline"></ion-icon></button>
+                </div>
+
+                <nav className="space-y-1 overflow-y-auto scroll-hide h-[calc(100vh-250px)]">
+                  <SectionTitle title="Essencial" />
+                  <NavItem icon="grid-outline" label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+                  <NavItem icon="swap-horizontal-outline" label="Transações" active={activeTab === 'transactions'} onClick={() => setActiveTab('transactions')} />
+                  <NavItem icon="pie-chart-outline" label="Categorias" active={activeTab === 'categories'} onClick={() => setActiveTab('categories')} />
+                  
+                  <SectionTitle title="Gestão Inteligente" />
+                  <NavItem icon="analytics-outline" label="Tendências" active={activeTab === 'charts'} onClick={() => setActiveTab('charts')} />
+                  <NavItem icon="repeat-outline" label="Assinaturas" active={activeTab === 'subs'} onClick={() => setActiveTab('subs')} />
+                  <NavItem icon="wallet-outline" label="Dívidas" active={activeTab === 'debts'} onClick={() => setActiveTab('debts')} />
+                  
+                  <SectionTitle title="Sistema" />
+                  <NavItem icon="settings-outline" label="Definições" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+                </nav>
+
+                <div className="mt-auto pt-6 border-t border-white/5">
+                   <button 
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 text-red-400 text-[11px] font-black uppercase tracking-widest hover:text-red-300 transition-colors w-full p-3 glass rounded-xl"
+                   >
+                      <ion-icon name="log-out-outline" style={{fontSize: '20px'}}></ion-icon> Encerrar Sessão
+                   </button>
+                </div>
+              </aside>
+
+              {/* Área Principal */}
+              <main className="flex-1 flex flex-col overflow-hidden relative">
+                <header className="p-8 flex justify-between items-center z-10">
+                  <button onClick={() => setSidebar(true)} className="lg:hidden p-2 glass rounded-xl flex items-center"><ion-icon name="menu-outline" size="large"></ion-icon></button>
+                  <h2 className="text-xl font-bold italic hidden sm:block uppercase tracking-tighter">
+                    {activeTab === 'dashboard' && "Visão Geral"}
+                    {activeTab === 'transactions' && "Histórico"}
+                    {activeTab === 'categories' && "Distribuição"}
+                    {activeTab === 'charts' && "Análise Pro"}
+                    {activeTab === 'subs' && "Recorrências"}
+                    {activeTab === 'debts' && "Passivos"}
+                    {activeTab === 'settings' && "Configurações"}
+                  </h2>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Premium Black</p>
+                      <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Sessão Ativa</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl btn-gold flex items-center justify-center text-sm shadow-lg shadow-gold/20">JS</div>
+                  </div>
+                </header>
+
+                <section className="flex-1 overflow-y-auto p-8 lg:px-16 scroll-hide pb-20">
+                  <div className="max-w-5xl mx-auto">
+                    <div key={activeTab} className="fade-in">
+                      {activeTab === 'dashboard' && <Dashboard currency={currency} />}
+                      {activeTab === 'transactions' && <div className="glass p-10 rounded-[3rem] text-center"><p className="text-gray-500 font-bold uppercase text-xs">A carregar transações...</p></div>}
+                      {activeTab === 'categories' && <div className="glass p-10 rounded-[3rem] text-center"><p className="text-gray-500 font-bold uppercase text-xs">Módulo de Categorias</p></div>}
+                      {activeTab === 'charts' && <ChartsView currency={currency} />}
+                      {activeTab === 'subs' && <SubscriptionsView currency={currency} />}
+                      {activeTab === 'debts' && <DebtsView currency={currency} />}
+                      {activeTab === 'settings' && <SettingsView currency={currency} theme={theme} setTheme={setTheme} />}
+                    </div>
+                  </div>
+                </section>
+              </main>
+            </div>
+          )}
         </div>
       );
     };
@@ -127,61 +218,58 @@
     const NavItem = ({ icon, label, active, onClick }) => (
       <div onClick={onClick} className={`nav-item flex items-center gap-4 px-5 py-4 ${active ? 'active' : 'hover:bg-white/5'}`}>
         <ion-icon name={icon} style={{fontSize: '20px'}}></ion-icon>
-        <span>{label}</span>
+        <span className="tracking-tight">{label}</span>
       </div>
     );
 
     const SectionTitle = ({ title }) => <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.25em] mt-8 mb-3 ml-5">{title}</p>;
 
-    // --- DASHBOARD ---
+    // Componentes de Visão
     const Dashboard = ({ currency }) => (
       <div className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard title="Patrimônio" value={`${currency} 15.420,00`} trend="+12%" positive />
-          <StatCard title="Gastos Fixos" value={`${currency} 3.200,00`} trend="Mensal" />
-          <StatCard title="Economia Livre" value={`${currency} 2.150,00`} trend="+5%" positive />
+          <StatCard title="Saldo Consolidado" value={`${currency} 15.420,00`} trend="+12.5%" positive icon="wallet-outline" />
+          <StatCard title="Despesas Mensais" value={`${currency} 3.200,00`} trend="Dentro da meta" icon="receipt-outline" />
+          <StatCard title="Ativos em Carteira" value={`${currency} 25.150,00`} trend="+5.2%" positive icon="trending-up-outline" />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="glass p-8 rounded-[2.5rem] border border-white/5">
-             <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold italic">Fluxo de Caixa (7 dias)</h3>
-                <span className="text-[10px] text-emerald-500 font-bold uppercase">+2.5% vs semana anterior</span>
-             </div>
+          <div className="glass p-8 rounded-[2.5rem]">
+             <h3 className="font-bold italic mb-6 text-xs uppercase tracking-widest text-gray-500">Movimentação Semanal</h3>
              <div className="h-48 flex items-end justify-between gap-3">
-                {[40, 70, 45, 90, 65, 85, 50].map((h, i) => (
-                  <div key={i} className="flex-1 bg-white/5 rounded-t-xl relative group overflow-hidden">
-                    <div className="absolute bottom-0 w-full btn-gold transition-all duration-500" style={{height: `${h}%`}}></div>
+                {[45, 80, 55, 95, 75, 90, 60].map((h, i) => (
+                  <div key={i} className="flex-1 bg-white/5 rounded-t-xl relative group h-full">
+                    <div className="absolute bottom-0 w-full btn-gold transition-all duration-700 rounded-t-lg shadow-lg" style={{height: `${h}%`}}></div>
                   </div>
                 ))}
              </div>
-             <div className="flex justify-between mt-4 text-[9px] text-gray-500 font-bold uppercase">
+             <div className="flex justify-between mt-4 text-[9px] text-gray-500 font-black uppercase tracking-widest">
                 <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
              </div>
           </div>
-
-          <div className="glass p-8 rounded-[2.5rem] border border-white/5">
-             <h3 className="font-bold italic mb-6">Limites de Categoria</h3>
+          <div className="glass p-8 rounded-[2.5rem]">
+             <h3 className="font-bold italic mb-6 text-xs uppercase tracking-widest text-gray-500">Metas Ativas</h3>
              <div className="space-y-6">
-                <LimitBar label="Moradia" current={1200} total={1200} color="bg-blue-400" />
-                <LimitBar label="Alimentação" current={850} total={1000} color="bg-emerald-400" />
-                <LimitBar label="Lazer" current={420} total={500} color="bg-yellow-500" />
-                <LimitBar label="Saúde" current={150} total={300} color="bg-purple-400" />
+                <LimitBar label="Fundo de Reserva" current={8500} total={10000} color="bg-emerald-400" />
+                <LimitBar label="Investimentos Diversos" current={3200} total={15000} color="bg-blue-400" />
+                <LimitBar label="Equipamentos Tech" current={1500} total={2500} color="bg-purple-500" />
              </div>
           </div>
         </div>
       </div>
     );
 
-    const StatCard = ({ title, value, trend, positive }) => (
-      <div className="glass p-8 rounded-[2rem] border border-white/5 relative overflow-hidden group">
+    const StatCard = ({ title, value, trend, positive, icon }) => (
+      <div className="glass p-8 rounded-[2rem] relative overflow-hidden group hover:border-white/20 transition-all cursor-default">
         <div className="relative z-10">
-          <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2">{title}</p>
-          <h3 className="text-2xl font-black mb-2">{value}</h3>
+          <div className="flex justify-between items-start mb-4">
+            <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{title}</p>
+            <div className="text-white/20 text-xl group-hover:text-gold transition-colors">
+              <ion-icon name={icon}></ion-icon>
+            </div>
+          </div>
+          <h3 className="text-2xl font-black mb-2 tracking-tighter">{value}</h3>
           <p className={`text-[10px] font-bold ${positive ? 'text-emerald-400' : 'text-gray-400'}`}>{trend}</p>
-        </div>
-        <div className="absolute -right-4 -bottom-4 text-white/5 text-6xl rotate-12 group-hover:rotate-0 transition-transform">
-          <ion-icon name="stats-chart"></ion-icon>
         </div>
       </div>
     );
@@ -190,106 +278,50 @@
       const perc = (current / total) * 100;
       return (
         <div className="space-y-2">
-          <div className="flex justify-between text-[10px] font-bold uppercase">
+          <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
             <span className="text-gray-400">{label}</span>
-            <span>{current} / {total}</span>
+            <span>{perc.toFixed(0)}%</span>
           </div>
           <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-            <div className={`h-full ${color} transition-all duration-1000`} style={{width: `${perc}%`}}></div>
+            <div className={`h-full ${color} transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.1)]`} style={{width: `${perc}%`}}></div>
           </div>
         </div>
       );
     };
 
-    // --- GRÁFICOS DETALHADOS ---
-    const ChartsView = ({ currency }) => {
-      const canvasRef = useRef(null);
-      const pieRef = useRef(null);
-
-      useEffect(() => {
-        const ctx = canvasRef.current.getContext('2d');
-        new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [{
-              label: 'Despesas',
-              data: [1200, 1900, 1500, 2100, 1800, 2400],
-              borderColor: '#bf953f',
-              backgroundColor: 'rgba(191, 149, 63, 0.1)',
-              fill: true,
-              tension: 0.4
-            }]
-          },
-          options: {
-            plugins: { legend: { display: false } },
-            scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#666' } } }
-          }
-        });
-
-        const ctxPie = pieRef.current.getContext('2d');
-        new Chart(ctxPie, {
-          type: 'doughnut',
-          data: {
-            labels: ['Fixos', 'Variaveis', 'Lazer'],
-            datasets: [{
-              data: [50, 30, 20],
-              backgroundColor: ['#bf953f', '#3b82f6', '#10b981'],
-              borderWidth: 0
-            }]
-          },
-          options: { plugins: { legend: { position: 'bottom', labels: { color: '#888', font: { size: 10 } } } } }
-        });
-      }, []);
-
-      return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 glass p-10 rounded-[3rem]">
-            <h3 className="text-xl font-bold italic mb-8">Evolução Mensal</h3>
-            <canvas ref={canvasRef} height="150"></canvas>
-          </div>
-          <div className="glass p-10 rounded-[3rem]">
-            <h3 className="text-xl font-bold italic mb-8">Composição</h3>
-            <canvas ref={pieRef}></canvas>
-          </div>
-        </div>
-      );
-    };
-
-    // --- ASSINATURAS ---
     const SubscriptionsView = ({ currency }) => {
       const subs = [
-        { name: 'Netflix Pro', price: 55.90, next: '12 de Out', icon: 'logo-netflix', color: 'text-red-500' },
-        { name: 'Spotify Duo', price: 24.90, next: '15 de Out', icon: 'musical-notes', color: 'text-emerald-500' },
-        { name: 'Academia VIP', price: 120.00, next: '05 de Out', icon: 'barbell', color: 'text-blue-500' },
-        { name: 'iCloud 2TB', price: 34.90, next: '22 de Out', icon: 'cloud', color: 'text-sky-400' },
+        { name: 'Streaming Premium', price: 55.90, icon: 'film-outline', color: 'text-red-500' },
+        { name: 'Cloud Storage Pro', price: 34.90, icon: 'cloud-done-outline', color: 'text-emerald-500' },
+        { name: 'Workspace Business', price: 19.90, icon: 'briefcase-outline', color: 'text-sky-400' }
       ];
 
       return (
         <div className="space-y-8">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-end">
             <div>
-              <h3 className="text-2xl font-black italic">Recorrentes</h3>
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Previsão: {currency} {subs.reduce((a,b)=>a+b.price, 0).toFixed(2)} / mês</p>
+              <h3 className="text-2xl font-black italic tracking-tighter">Assinaturas Ativas</h3>
+              <p className="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-widest">Total Mensal: {currency} {subs.reduce((a,b)=>a+b.price, 0).toFixed(2)}</p>
             </div>
-            <button className="btn-gold px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest">+ Nova Assinatura</button>
+            <button className="btn-gold px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-gold/20">+ Nova</button>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {subs.map((s, i) => (
-              <div key={i} className="glass p-6 rounded-3xl flex items-center justify-between group hover:border-yellow-500/30 transition-all">
+              <div key={i} className="glass p-6 rounded-[2rem] flex items-center justify-between group border-transparent hover:border-yellow-500/20 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl ${s.color}`}>
+                  <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl ${s.color} shadow-inner`}>
                     <ion-icon name={s.icon}></ion-icon>
                   </div>
                   <div>
-                    <h4 className="font-bold">{s.name}</h4>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase">Vence em: {s.next}</p>
+                    <h4 className="font-bold text-sm tracking-tight">{s.name}</h4>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Recorrente</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-black text-yellow-500">{currency} {s.price.toFixed(2)}</p>
-                  <p className="text-[9px] text-gray-600 font-bold uppercase">Automático</p>
+                <div className="flex flex-col items-end gap-2">
+                  <p className="text-lg font-black text-white">{currency} {s.price.toFixed(2)}</p>
+                  <button className="text-[9px] font-black uppercase tracking-widest bg-white/5 px-3 py-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-1">
+                    <ion-icon name="create-outline"></ion-icon> Editar
+                  </button>
                 </div>
               </div>
             ))}
@@ -298,150 +330,107 @@
       );
     };
 
-    // --- DÍVIDAS ---
-    const DebtsView = ({ currency }) => {
-      const debts = [
-        { name: 'Financiamento Carro', total: 45000, paid: 15200, parcels: '24/48', interest: '1.2%' },
-        { name: 'Empréstimo Reforma', total: 12000, paid: 8000, parcels: '08/12', interest: '0.8%' }
-      ];
+    const ChartsView = ({ currency }) => {
+      const lineRef = useRef(null);
+      useEffect(() => {
+        const ctx = lineRef.current.getContext('2d');
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+              data: [12000, 14500, 13800, 16200, 15400, 18500],
+              borderColor: '#bf953f',
+              borderWidth: 4,
+              tension: 0.4,
+              fill: true,
+              backgroundColor: (context) => {
+                const gradient = context.chart.ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(191, 149, 63, 0.1)');
+                gradient.addColorStop(1, 'rgba(191, 149, 63, 0)');
+                return gradient;
+              },
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#fcf6ba'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { 
+              y: { display: false }, 
+              x: { grid: { display: false }, ticks: { color: '#444', font: { weight: 'bold', size: 10 } } } 
+            }
+          }
+        });
+        return () => chart.destroy();
+      }, []);
 
       return (
-        <div className="space-y-8">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {debts.map((d, i) => (
-                <div key={i} className="glass p-10 rounded-[2.5rem] card-debt border border-white/5">
-                   <div className="flex justify-between items-start mb-8">
-                      <div>
-                        <h4 className="text-xl font-black italic">{d.name}</h4>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase">Juros: {d.interest} ao mês</p>
-                      </div>
-                      <div className="px-3 py-1 bg-yellow-500/10 rounded-lg">
-                        <span className="text-[10px] font-black text-yellow-500 uppercase">{d.parcels}</span>
-                      </div>
-                   </div>
-
-                   <div className="space-y-2 mb-8">
-                      <div className="flex justify-between text-[10px] font-black uppercase">
-                        <span className="text-gray-500">Progresso de Quitação</span>
-                        <span className="text-emerald-400">{((d.paid/d.total)*100).toFixed(1)}%</span>
-                      </div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full btn-gold" style={{width: `${(d.paid/d.total)*100}%`}}></div>
-                      </div>
-                   </div>
-
-                   <div className="grid grid-cols-2 gap-6">
-                      <div>
-                        <p className="text-[9px] text-gray-600 font-black uppercase mb-1">Total Devido</p>
-                        <p className="text-lg font-black">{currency} {d.total.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] text-gray-600 font-black uppercase mb-1">Restante</p>
-                        <p className="text-lg font-black text-red-400">{currency} {(d.total - d.paid).toLocaleString()}</p>
-                      </div>
-                   </div>
-                </div>
-              ))}
-              <div className="glass p-10 rounded-[2.5rem] border-dashed border-2 border-white/10 flex flex-col items-center justify-center gap-4 text-gray-600 hover:text-yellow-500 cursor-pointer transition-all">
-                <ion-icon name="add-circle-outline" style={{fontSize: '48px'}}></ion-icon>
-                <p className="text-xs font-black uppercase tracking-widest">Simular Novo Empréstimo</p>
-              </div>
-           </div>
+        <div className="glass p-10 rounded-[3rem] h-[450px]">
+          <h3 className="text-xl font-bold italic mb-10 tracking-tighter">Performance de Carteira</h3>
+          <div className="h-[300px]">
+            <canvas ref={lineRef}></canvas>
+          </div>
         </div>
       );
     };
 
-    // --- PLANEJAMENTO ---
-    const PlanningView = ({ currency }) => (
-      <div className="space-y-8">
-        <div className="glass p-10 rounded-[3rem]">
-          <h3 className="text-xl font-bold italic mb-6">Previsão de Patrimônio</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-             <div className="p-6 bg-white/3 rounded-3xl border border-white/5">
-                <p className="text-[10px] text-gray-500 font-bold uppercase mb-4">Em 3 Meses</p>
-                <p className="text-2xl font-black text-emerald-400">+ {currency} 6.450</p>
-                <div className="h-1 w-12 bg-emerald-500/30 mt-2 rounded-full"></div>
-             </div>
-             <div className="p-6 bg-white/3 rounded-3xl border border-white/5">
-                <p className="text-[10px] text-gray-500 font-bold uppercase mb-4">Em 6 Meses</p>
-                <p className="text-2xl font-black text-emerald-400">+ {currency} 12.900</p>
-                <div className="h-1 w-12 bg-emerald-500/30 mt-2 rounded-full"></div>
-             </div>
-             <div className="p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20">
-                <p className="text-[10px] text-emerald-500 font-bold uppercase mb-4">Em 12 Meses</p>
-                <p className="text-2xl font-black text-emerald-400">+ {currency} 25.800</p>
-                <p className="text-[9px] text-emerald-500/50 font-bold mt-2 uppercase">Meta Anual</p>
-             </div>
-          </div>
-        </div>
-
-        <div className="glass p-10 rounded-[3rem] border border-yellow-500/10">
-          <h3 className="text-lg font-bold italic mb-6">Plano de Ação Semanal</h3>
-          <div className="space-y-4">
-            <CheckItem label="Reduzir gastos com alimentação fora em 15%" />
-            <CheckItem label="Aportar 200€ adicionais na reserva de emergência" checked />
-            <CheckItem label="Revisar assinaturas de streaming não utilizadas" />
-            <CheckItem label="Simular quitação antecipada do carro" />
-          </div>
-        </div>
+    const DebtsView = ({ currency }) => (
+      <div className="glass p-10 rounded-[3rem] border-l-8 border-red-500/20 shadow-xl">
+         <div className="flex justify-between items-start mb-6">
+           <div>
+             <h3 className="text-2xl font-black italic tracking-tighter">Cartão Black Platinum</h3>
+             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Limite utilizado: 42%</p>
+           </div>
+           <ion-icon name="card-outline" style={{fontSize: '32px', color: '#666'}}></ion-icon>
+         </div>
+         <div className="flex items-baseline gap-2">
+            <span className="text-4xl font-black text-red-500">{currency} 8.450,00</span>
+         </div>
+         <p className="text-[10px] text-gray-500 font-bold uppercase mt-4 flex items-center gap-2">
+            <ion-icon name="time-outline"></ion-icon> Fechamento da fatura em 72 horas
+         </p>
+         <button className="w-full mt-10 py-5 btn-gold rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-gold/10">Quitar Débito Agora</button>
       </div>
     );
 
-    const CheckItem = ({ label, checked }) => (
-      <div className="flex items-center gap-4 p-5 bg-white/2 rounded-2xl border border-white/5 group cursor-pointer hover:bg-white/5 transition-all">
-        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${checked ? 'bg-yellow-500 border-yellow-500' : 'border-white/10 group-hover:border-yellow-500/50'}`}>
-          {checked && <ion-icon name="checkmark" style={{color: '#000', fontWeight: 'bold'}}></ion-icon>}
-        </div>
-        <span className={`text-sm font-semibold ${checked ? 'text-gray-500 line-through' : ''}`}>{label}</span>
-      </div>
-    );
-
-    // --- CONFIGURAÇÕES ---
-    const SettingsView = ({ currency, setCurrency, user }) => (
+    const SettingsView = ({ theme, setTheme }) => (
       <div className="max-w-2xl space-y-8">
         <div className="glass p-10 rounded-[3rem]">
-          <h3 className="text-xl font-bold italic mb-10">Preferências do Sistema</h3>
-          
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-2">
-                <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Moeda de Exibição</label>
-                <select value={currency} onChange={(e)=>setCurrency(e.target.value)} className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none font-bold text-sm">
-                  <option value="€">Euro (€)</option>
-                  <option value="R$">Real (R$)</option>
-                  <option value="$">Dólar ($)</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Tema Visual</label>
-                <select className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none font-bold text-sm">
-                  <option>Deep Black (Padrão)</option>
-                  <option>Modern Light</option>
-                  <option>Midnight Blue</option>
-                </select>
+          <h3 className="text-xl font-bold italic mb-10 tracking-tighter">Preferências do Sistema</h3>
+          <div className="space-y-10">
+            <div className="flex flex-col gap-3">
+              <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Estética Visual</label>
+              <div className="flex gap-3">
+                {['Deep Black', 'Modern Light'].map(t => (
+                  <button 
+                    key={t}
+                    onClick={() => setTheme(t)}
+                    className={`flex-1 py-5 rounded-2xl font-bold transition-all text-xs tracking-widest uppercase ${theme === t ? 'btn-gold shadow-lg shadow-gold/20' : 'glass hover:bg-white/5'}`}
+                  >
+                    {t === 'Deep Black' ? 'Onyx Dark' : 'Quartz Light'}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="p-6 bg-white/2 border border-white/5 rounded-[2rem]">
-               <h4 className="text-xs font-black uppercase tracking-widest mb-4 text-gray-500">Dados da Conta</h4>
-               <div className="flex items-center gap-4 mb-6">
-                 <div className="w-14 h-14 rounded-full btn-gold flex items-center justify-center text-xl">JS</div>
-                 <div>
-                    <p className="font-bold">{user.email}</p>
-                    <p className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">Nível: Investidor Pro</p>
-                 </div>
+            <div className="p-8 bg-white/2 border border-white/5 rounded-[2.5rem]">
+               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-gray-600">Gestão Avançada</h4>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button className="py-4 glass rounded-xl text-[9px] font-black uppercase tracking-widest hover:text-white transition-all flex items-center justify-center gap-2">
+                    <ion-icon name="cloud-download-outline"></ion-icon> Exportar Dados
+                  </button>
+                  <button className="py-4 glass rounded-xl text-[9px] font-black uppercase tracking-widest hover:text-white transition-all flex items-center justify-center gap-2">
+                    <ion-icon name="shield-checkmark-outline"></ion-icon> Logs de Acesso
+                  </button>
                </div>
-               <div className="grid grid-cols-2 gap-4">
-                  <button className="py-4 glass rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10">Alterar Senha</button>
-                  <button className="py-4 glass rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10">Backup de Dados</button>
-               </div>
-            </div>
-
-            <div className="pt-4">
-               <button className="w-full py-5 btn-gold rounded-2xl text-[10px] font-black uppercase tracking-widest">Salvar Alterações</button>
             </div>
           </div>
         </div>
+        <p className="text-center text-[10px] text-gray-600 font-bold uppercase tracking-[0.4em]">Build Version: 2.6.0-Gold</p>
       </div>
     );
 
