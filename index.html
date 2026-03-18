@@ -3,410 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoneyForge Pro | Financial Intelligence</title>
+  <title>MoneyForge Pro | Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0a0a0a; color: #fff; margin: 0; height: 100vh; overflow: hidden; }
+    .glass { background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+    .gold-text { color: #bf953f; }
+    .nav-active { background: rgba(191, 149, 63, 0.1); border: 1px solid rgba(191, 149, 63, 0.2); color: #bf953f; }
+    .loader { border: 2px solid rgba(191,149,63,0.1); border-top: 2px solid #bf953f; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
     
-    :root {
-      --gold: #bf953f;
-      --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 50%, #b38728 100%);
-      --dark: #0a0a0a;
-      --glass: rgba(15, 15, 15, 0.9);
-      --border: rgba(255, 255, 255, 0.08);
+    /* Fallback para evitar tela preta eterna */
+    #no-render-notice {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-    
-    body { 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      background: var(--dark);
-      background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0a0a0a 100%);
-      color: #fff;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    .glass-card {
-      background: var(--glass);
-      backdrop-filter: blur(25px);
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-
-    .btn-gold {
-      background: var(--gold-gradient);
-      color: #000; 
-      font-weight: 800; 
-      font-size: 11px; 
-      text-transform: uppercase;
-      letter-spacing: 0.15em; 
-      padding: 16px 32px; 
-      border-radius: 50px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 15px rgba(191, 149, 63, 0.3);
-      cursor: pointer;
-      border: none;
-    }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(191, 149, 63, 0.5); }
-
-    .input-field {
-      width: 100%; 
-      background: rgba(255, 255, 255, 0.03); 
-      border: 1px solid var(--border);
-      border-radius: 16px; 
-      padding: 18px; 
-      color: #fff; 
-      font-size: 14px;
-      transition: all 0.3s;
-    }
-    .input-field:focus { outline: none; border-color: var(--gold); }
-
-    .nav-link {
-      display: flex; align-items: center; gap: 16px; padding: 14px 20px;
-      border-radius: 18px; color: #888; font-size: 13px; font-weight: 600;
-      transition: all 0.3s; cursor: pointer;
-    }
-    .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255, 255, 255, 0.03); }
-    .nav-link.active { border: 1px solid rgba(191, 149, 63, 0.3); color: var(--gold); }
-
-    .loader {
-      border: 2px solid rgba(191, 149, 63, 0.1);
-      border-top: 2px solid var(--gold);
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    .category-tag {
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      background: rgba(255,255,255,0.05);
-    }
-
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
   </style>
 </head>
 <body>
+  <div id="no-render-notice">
+    <h1 style="color: #bf953f; font-weight: 800; font-size: 24px;">MONEYFORGE PRO</h1>
+    <p style="color: #666; margin: 15px 0;">O motor de renderização demorou demasiado tempo a responder.</p>
+    <a href="login.html" style="background: #bf953f; color: #000; padding: 12px 24px; border-radius: 12px; font-weight: bold; text-decoration: none;">Ir para o Login</a>
+  </div>
+
   <div id="root"></div>
 
   <script type="babel">
-    const { useState, useEffect, useMemo } = React;
-
+    const { useState, useEffect } = React;
+    
+    // Configuração Supabase
     const SUPABASE_URL = 'https://onpdxpobidntgofqshlk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ucGR4cG9iaWRudGdvZnFzaGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzYyMjAsImV4cCI6MjA1NjgxMjIyMH0.fK0A9-Y-vN4o7Jp3D0H6m0Qo9H_6O_oH_oH_oH_oH_o';
-    
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const CATEGORIES = {
-      'Geral': 'grid-outline',
-      'Alimentação': 'restaurant-outline',
-      'Transporte': 'car-outline',
-      'Moradia': 'home-outline',
-      'Lazer': 'sparkles-outline',
-      'Saúde': 'medkit-outline',
-      'Educação': 'book-outline',
-      'Salário': 'cash-outline',
-      'Investimento': 'trending-up-outline'
-    };
+    // Esconder o aviso de erro se o React iniciar
+    document.getElementById('no-render-notice').style.display = 'none';
 
-    const App = () => {
+    function App() {
       const [session, setSession] = useState(null);
       const [loading, setLoading] = useState(true);
-      const [activeTab, setActiveTab] = useState('dashboard');
-      const [showModal, setShowModal] = useState(false);
-      const [transactions, setTransactions] = useState([]);
-      const [filter, setFilter] = useState('all');
-      const [authForm, setAuthForm] = useState({ email: '', password: '', isLogin: true });
+      const [activeTab, setActiveTab] = useState('home');
+      const [data, setData] = useState([]);
+      const [error, setError] = useState(null);
 
       useEffect(() => {
-        const initSession = async () => {
+        const checkSession = async () => {
           try {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            setSession(session);
+            const { data: { session: current }, error: sessionError } = await supabaseClient.auth.getSession();
+            
+            if (sessionError) throw sessionError;
+
+            if (!current) {
+              // Se não houver sessão, tentamos o redirecionamento
+              console.warn("Sem sessão detectada, redirecionando...");
+              window.location.href = 'login.html';
+              
+              // Se o redirecionamento falhar (comum em previews), mostramos erro após 2s
+              setTimeout(() => {
+                if (!window.location.href.includes('login.html')) {
+                  setError("Sessão não encontrada. Por favor, aceda a login.html manualmente.");
+                }
+              }, 2000);
+            } else {
+              setSession(current);
+              await loadData();
+            }
           } catch (err) {
-            console.error("Erro ao carregar sessão:", err);
+            console.error("Erro na App:", err);
+            setError(err.message);
           } finally {
             setLoading(false);
           }
         };
 
-        initSession();
-
-        const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-          setSession(session);
-        });
-
-        return () => subscription?.unsubscribe();
+        checkSession();
       }, []);
 
-      useEffect(() => {
-        if (session) fetchData();
-      }, [session, filter]);
-
-      const fetchData = async () => {
+      async function loadData() {
         try {
-          let query = supabaseClient
+          const { data: list, error: fetchError } = await supabaseClient
             .from('transactions')
             .select('*')
             .order('date', { ascending: false });
-
-          if (filter === 'income') query = query.eq('type', 'income');
-          if (filter === 'expense') query = query.eq('type', 'expense');
-
-          const { data, error } = await query;
-          if (error) throw error;
-          setTransactions(data || []);
+          
+          if (fetchError) throw fetchError;
+          setData(list || []);
         } catch (err) {
-          console.error("Erro ao buscar dados:", err);
+          console.error("Erro ao carregar dados:", err);
         }
-      };
+      }
 
-      const handleToggleStatus = async (id, currentStatus) => {
-        const newStatus = currentStatus === 'paid' ? 'pending' : 'paid';
-        const { error } = await supabaseClient
-          .from('transactions')
-          .update({ status: newStatus })
-          .eq('id', id);
-        if (!error) fetchData();
-      };
+      async function logout() {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'login.html';
+      }
 
-      const stats = useMemo(() => {
-        if (!transactions.length) return { balance: 0, income: 0, expense: 0, forecast: 0 };
-        
-        const paidIncome = transactions.filter(t => t.type === 'income' && t.status === 'paid').reduce((a, b) => a + Number(b.value), 0);
-        const paidExpense = transactions.filter(t => t.type === 'expense' && t.status === 'paid').reduce((a, b) => a + Number(b.value), 0);
-        const pendingExpense = transactions.filter(t => t.type === 'expense' && t.status === 'pending').reduce((a, b) => a + Number(b.value), 0);
-        
-        return { 
-          balance: paidIncome - paidExpense, 
-          income: paidIncome, 
-          expense: paidExpense,
-          forecast: paidIncome - paidExpense - pendingExpense
-        };
-      }, [transactions]);
-
-      if (loading) return <div className="h-screen flex items-center justify-center bg-black"><div className="loader"></div></div>;
-
-      if (!session) {
+      if (error) {
         return (
-          <div className="h-screen flex items-center justify-center p-6 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80')] bg-cover">
-            <div className="absolute inset-0 bg-black/80"></div>
-            <div className="glass-card p-12 w-full max-w-md text-center border-white/10 relative z-10">
-              <h1 className="text-4xl font-black italic tracking-tighter mb-2">Money<span className="text-gold">Forge</span></h1>
-              <p className="text-[10px] uppercase tracking-[0.4em] text-white/30 mb-10">Financial Intelligence</p>
-              
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                setLoading(true);
-                const { error } = authForm.isLogin 
-                  ? await supabaseClient.auth.signInWithPassword({ email: authForm.email, password: authForm.password })
-                  : await supabaseClient.auth.signUp({ email: authForm.email, password: authForm.password });
-                if (error) alert(error.message);
-                setLoading(false);
-              }} className="space-y-4">
-                <input type="email" placeholder="E-mail" className="input-field" onChange={e => setAuthForm({...authForm, email: e.target.value})} required />
-                <input type="password" placeholder="Senha" className="input-field" onChange={e => setAuthForm({...authForm, password: e.target.value})} required />
-                <button type="submit" className="btn-gold w-full mt-4">{authForm.isLogin ? 'Entrar' : 'Cadastrar'}</button>
-              </form>
-              <button onClick={() => setAuthForm({...authForm, isLogin: !authForm.isLogin})} className="mt-8 text-[10px] uppercase font-black text-white/20 hover:text-white transition-all">
-                {authForm.isLogin ? 'Não tem conta? Crie uma' : 'Já tem conta? Faça Login'}
-              </button>
-            </div>
+          <div className="h-screen flex flex-col items-center justify-center bg-black p-8 text-center">
+            <h1 className="text-2xl font-black gold-text mb-4">ERRO DE ACESSO</h1>
+            <p className="text-white/40 mb-8 max-w-sm">{error}</p>
+            <a href="login.html" className="bg-white/5 border border-white/10 px-6 py-3 rounded-xl uppercase text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">
+              Voltar ao Login
+            </a>
           </div>
         );
       }
 
+      if (loading) return <div className="h-screen flex items-center justify-center bg-black"><div className="loader"></div></div>;
+
       return (
-        <div className="flex h-screen p-6 gap-6 overflow-hidden bg-black">
-          <aside className="w-72 glass-card flex flex-col p-8 shrink-0">
-            <div className="mb-12">
-              <h1 className="text-2xl font-black italic tracking-tighter">Money<span className="text-gold">Forge</span></h1>
-              <p className="text-[8px] text-white/20 font-black uppercase tracking-widest mt-1">Intelligence System</p>
-            </div>
+        <div className="flex h-screen p-4 gap-4 animate-in fade-in duration-500">
+          {/* Sidebar */}
+          <aside className="w-64 glass rounded-[24px] p-6 flex flex-col shrink-0">
+            <h1 className="text-xl font-black italic mb-10">Money<span className="gold-text">Forge</span></h1>
             <nav className="flex-1 space-y-2">
-              <NavLink label="Dashboard" icon="grid-outline" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-              <NavLink label="Extrato" icon="receipt-outline" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
-              <NavLink label="Cartões" icon="card-outline" active={activeTab === 'cards'} onClick={() => setActiveTab('cards')} />
+              <div onClick={() => setActiveTab('home')} className={`p-4 rounded-xl flex items-center gap-3 cursor-pointer transition-all ${activeTab === 'home' ? 'nav-active' : 'text-white/20 hover:text-white'}`}>
+                <ion-icon name="grid-outline"></ion-icon> <span className="text-[10px] font-bold uppercase tracking-widest">Dashboard</span>
+              </div>
+              <div onClick={() => setActiveTab('list')} className={`p-4 rounded-xl flex items-center gap-3 cursor-pointer transition-all ${activeTab === 'list' ? 'nav-active' : 'text-white/20 hover:text-white'}`}>
+                <ion-icon name="list-outline"></ion-icon> <span className="text-[10px] font-bold uppercase tracking-widest">Extrato</span>
+              </div>
             </nav>
-            <button onClick={() => supabaseClient.auth.signOut()} className="mt-auto flex items-center gap-3 text-white/20 hover:text-red-500 text-[10px] font-black uppercase transition-all">
-              <ion-icon name="log-out-outline"></ion-icon> Encerrar Sessão
-            </button>
+            <div className="pt-4 border-t border-white/5">
+              <p className="text-[9px] text-white/30 truncate mb-4">{session?.user?.email}</p>
+              <button onClick={logout} className="text-red-500/50 hover:text-red-500 text-[10px] font-bold uppercase flex items-center gap-2 transition-colors">
+                <ion-icon name="log-out-outline"></ion-icon> Encerrar Sessão
+              </button>
+            </div>
           </aside>
 
-          <main className="flex-1 flex flex-col gap-6 overflow-hidden">
-            <header className="glass-card p-8 flex justify-between items-center">
-              <div>
-                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 italic">Visão Geral</h2>
-                <p className="text-2xl font-black italic tracking-tight">{session.user.email.split('@')[0]}</p>
-              </div>
-              <div className="flex gap-4">
-                <div className="text-right">
-                  <p className="text-[9px] font-black uppercase text-white/20">Previsão Mensal</p>
-                  <p className={`text-lg font-bold italic ${stats.forecast >= 0 ? 'text-gold' : 'text-red-400'}`}>
-                    R$ {(stats.forecast || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
+          {/* Main Area */}
+          <main className="flex-1 flex flex-col gap-4 overflow-hidden">
+            <header className="h-20 glass rounded-[24px] flex items-center justify-between px-8 shrink-0">
+              <h2 className="text-sm font-black uppercase tracking-widest italic">{activeTab === 'home' ? 'Visão Geral' : 'Histórico Global'}</h2>
+              <div className="flex items-center gap-4">
+                 <button className="bg-white/5 hover:bg-white/10 p-3 rounded-full text-lg flex items-center"><ion-icon name="notifications-outline"></ion-icon></button>
               </div>
             </header>
 
-            <section className="flex-1 overflow-y-auto space-y-6 pb-6 pr-2">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatBox title="Saldo em Conta" value={stats.balance} />
-                <StatBox title="Receitas (Pagas)" value={stats.income} color="text-emerald-500" />
-                <StatBox title="Despesas (Pagas)" value={stats.expense} color="text-red-500" />
-              </div>
-
-              <div className="glass-card p-10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-                  <div>
-                    <h3 className="text-xl font-black italic">Fluxo de <span className="text-gold">Caixa</span></h3>
-                    <div className="flex flex-wrap gap-4 mt-4">
-                      <FilterBtn active={filter === 'all'} label="Tudo" onClick={() => setFilter('all')} />
-                      <FilterBtn active={filter === 'income'} label="Entradas" onClick={() => setFilter('income')} />
-                      <FilterBtn active={filter === 'expense'} label="Saídas" onClick={() => setFilter('expense')} />
-                    </div>
-                  </div>
-                  <button onClick={() => setShowModal(true)} className="btn-gold !py-3 !px-6 !text-[9px]">+ Lançamento</button>
+            <section className="flex-1 glass rounded-[24px] p-8 overflow-y-auto">
+              {data.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center opacity-20 italic">
+                  <ion-icon name="cube-outline" style={{fontSize: '40px'}}></ion-icon>
+                  <p className="mt-2 text-sm">Sem registos encontrados.</p>
                 </div>
-
-                <div className="space-y-4">
-                  {transactions.length === 0 ? (
-                    <div className="text-center py-20 text-white/10 uppercase font-black tracking-widest text-xs italic">
-                      Nenhuma transação encontrada
-                    </div>
-                  ) : transactions.map(t => (
-                    <div key={t.id} className={`p-5 rounded-2xl flex justify-between items-center border transition-all ${t.status === 'pending' ? 'bg-red-500/5 border-red-500/20' : 'bg-white/[0.02] border-white/5'}`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                          <ion-icon name={CATEGORIES[t.category] || 'grid-outline'}></ion-icon>
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-bold italic truncate">{t.description}</p>
-                            <span className="category-tag shrink-0">{t.category}</span>
-                          </div>
-                          <p className="text-[9px] font-black uppercase text-white/20 tracking-widest">{t.date}</p>
-                        </div>
+              ) : (
+                <div className="grid gap-4">
+                  {data.map(t => (
+                    <div key={t.id} className="p-4 bg-white/5 rounded-xl flex justify-between items-center border border-white/5 hover:bg-white/10 transition-all">
+                      <div>
+                        <p className="font-bold text-sm italic">{t.description}</p>
+                        <p className="text-[10px] text-white/20 uppercase font-bold">{t.category} • {t.date}</p>
                       </div>
-                      <div className="flex items-center gap-6 shrink-0">
-                        <div className="text-right">
-                          <p className={`font-black italic whitespace-nowrap ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                            {t.type === 'income' ? '+' : '-'} R$ {Number(t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </p>
-                          <button 
-                            onClick={() => handleToggleStatus(t.id, t.status)}
-                            className={`text-[8px] font-black uppercase tracking-tighter mt-1 px-2 py-1 rounded-md transition-all ${t.status === 'paid' ? 'text-emerald-500 bg-emerald-500/10' : 'text-red-400 bg-red-400/10'}`}
-                          >
-                            {t.status === 'paid' ? 'Confirmado' : 'Pendente (Clique p/ Pagar)'}
-                          </button>
-                        </div>
-                        <button onClick={async () => { if(confirm('Excluir transação?')) { await supabaseClient.from('transactions').delete().eq('id', t.id); fetchData(); } }} className="text-white/10 hover:text-red-500 transition-all text-xl flex">
-                          <ion-icon name="trash-outline"></ion-icon>
-                        </button>
+                      <div className={`font-black italic ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                        {t.type === 'income' ? '+' : '-'} R$ {Number(t.value).toFixed(2)}
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              )}
             </section>
           </main>
-
-          {showModal && (
-            <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[500] flex items-center justify-center p-6" onClick={() => setShowModal(false)}>
-              <div className="glass-card p-10 w-full max-w-lg border-white/10 shadow-2xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-2xl font-black italic mb-8">Novo <span className="text-gold">Registo</span></h3>
-                <form className="space-y-4" onSubmit={async (e) => {
-                  e.preventDefault();
-                  const form = e.target;
-                  const { error } = await supabaseClient.from('transactions').insert([{
-                    description: form.desc.value,
-                    value: form.val.value,
-                    type: form.type.value,
-                    category: form.cat.value,
-                    status: form.status.checked ? 'paid' : 'pending',
-                    date: form.date.value,
-                    userId: session.user.id
-                  }]);
-                  if (!error) { setShowModal(false); fetchData(); } else alert(error.message);
-                }}>
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-black rounded-xl border border-white/5">
-                    <label className="flex-1 cursor-pointer">
-                      <input type="radio" name="type" value="income" className="hidden peer" defaultChecked />
-                      <div className="py-2 text-center text-[9px] font-black uppercase peer-checked:bg-emerald-500/20 peer-checked:text-emerald-500 rounded-lg transition-all">Entrada</div>
-                    </label>
-                    <label className="flex-1 cursor-pointer">
-                      <input type="radio" name="type" value="expense" className="hidden peer" />
-                      <div className="py-2 text-center text-[9px] font-black uppercase peer-checked:bg-red-500/20 peer-checked:text-red-500 rounded-lg transition-all">Saída</div>
-                    </label>
-                  </div>
-                  
-                  <input name="desc" placeholder="Descrição (ex: Supermercado)" className="input-field" required />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input name="val" type="number" step="0.01" placeholder="Valor R$" className="input-field" required />
-                    <input name="date" type="date" className="input-field" defaultValue={new Date().toISOString().split('T')[0]} required />
-                  </div>
-                  
-                  <select name="cat" className="input-field appearance-none">
-                    {Object.keys(CATEGORIES).map(c => <option key={c} value={c} className="bg-neutral-900">{c}</option>)}
-                  </select>
-
-                  <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl cursor-pointer hover:bg-white/[0.04] transition-all">
-                    <input type="checkbox" name="status" defaultChecked className="w-5 h-5 accent-gold cursor-pointer" />
-                    <span className="text-[10px] font-black uppercase text-white/40">Pagamento já realizado?</span>
-                  </label>
-
-                  <div className="flex gap-4 pt-4">
-                    <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase text-white/20 hover:text-white transition-all">Cancelar</button>
-                    <button type="submit" className="btn-gold flex-[2]">Salvar Transação</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
         </div>
       );
-    };
+    }
 
-    const NavLink = ({ label, icon, active, onClick }) => (
-      <div onClick={onClick} className={`nav-link ${active ? 'active' : ''}`}>
-        <ion-icon name={icon}></ion-icon>
-        <span className="uppercase tracking-widest text-[10px] font-black">{label}</span>
-      </div>
-    );
-
-    const StatBox = ({ title, value, color }) => (
-      <div className="glass-card p-8 group hover:border-gold/30 transition-all cursor-default">
-        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 mb-3 italic">{title}</p>
-        <h4 className={`text-2xl font-black italic tracking-tight ${color || 'text-white'}`}>
-          R$ {(value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-        </h4>
-      </div>
-    );
-
-    const FilterBtn = ({ label, active, onClick }) => (
-      <button onClick={onClick} className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${active ? 'bg-gold text-black shadow-lg' : 'bg-white/5 text-white/30 hover:text-white border border-transparent hover:border-white/10'}`}>
-        {label}
-      </button>
-    );
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    // Renderização com Catch para segurança
+    try {
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    } catch (e) {
+      document.getElementById('no-render-notice').style.display = 'flex';
+      console.error("Erro Crítico no React:", e);
+    }
   </script>
 </body>
 </html>
