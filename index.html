@@ -9,8 +9,8 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/sidebar/ionicons.esm.js"></script>
-  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap');
@@ -54,6 +54,7 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 4px 15px rgba(191, 149, 63, 0.3);
       cursor: pointer;
+      border: none;
     }
     .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(191, 149, 63, 0.5); }
 
@@ -95,6 +96,10 @@
       letter-spacing: 0.1em;
       background: rgba(255,255,255,0.05);
     }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
   </style>
 </head>
 <body>
@@ -130,10 +135,18 @@
       const [authForm, setAuthForm] = useState({ email: '', password: '', isLogin: true });
 
       useEffect(() => {
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
-          setSession(session);
-          setLoading(false);
-        });
+        const initSession = async () => {
+          try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            setSession(session);
+          } catch (err) {
+            console.error("Erro ao carregar sessão:", err);
+          } finally {
+            setLoading(false);
+          }
+        };
+
+        initSession();
 
         const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event, session) => {
           setSession(session);
@@ -147,16 +160,21 @@
       }, [session, filter]);
 
       const fetchData = async () => {
-        let query = supabaseClient
-          .from('transactions')
-          .select('*')
-          .order('date', { ascending: false });
+        try {
+          let query = supabaseClient
+            .from('transactions')
+            .select('*')
+            .order('date', { ascending: false });
 
-        if (filter === 'income') query = query.eq('type', 'income');
-        if (filter === 'expense') query = query.eq('type', 'expense');
+          if (filter === 'income') query = query.eq('type', 'income');
+          if (filter === 'expense') query = query.eq('type', 'expense');
 
-        const { data, error } = await query;
-        if (!error) setTransactions(data);
+          const { data, error } = await query;
+          if (error) throw error;
+          setTransactions(data || []);
+        } catch (err) {
+          console.error("Erro ao buscar dados:", err);
+        }
       };
 
       const handleToggleStatus = async (id, currentStatus) => {
@@ -169,6 +187,8 @@
       };
 
       const stats = useMemo(() => {
+        if (!transactions.length) return { balance: 0, income: 0, expense: 0, forecast: 0 };
+        
         const paidIncome = transactions.filter(t => t.type === 'income' && t.status === 'paid').reduce((a, b) => a + Number(b.value), 0);
         const paidExpense = transactions.filter(t => t.type === 'expense' && t.status === 'paid').reduce((a, b) => a + Number(b.value), 0);
         const pendingExpense = transactions.filter(t => t.type === 'expense' && t.status === 'pending').reduce((a, b) => a + Number(b.value), 0);
@@ -213,7 +233,7 @@
       }
 
       return (
-        <div className="flex h-screen p-6 gap-6 overflow-hidden">
+        <div className="flex h-screen p-6 gap-6 overflow-hidden bg-black">
           <aside className="w-72 glass-card flex flex-col p-8 shrink-0">
             <div className="mb-12">
               <h1 className="text-2xl font-black italic tracking-tighter">Money<span className="text-gold">Forge</span></h1>
@@ -239,13 +259,13 @@
                 <div className="text-right">
                   <p className="text-[9px] font-black uppercase text-white/20">Previsão Mensal</p>
                   <p className={`text-lg font-bold italic ${stats.forecast >= 0 ? 'text-gold' : 'text-red-400'}`}>
-                    R$ {stats.forecast.toLocaleString('pt-BR')}
+                    R$ {(stats.forecast || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
             </header>
 
-            <section className="flex-1 overflow-y-auto space-y-6 pb-6">
+            <section className="flex-1 overflow-y-auto space-y-6 pb-6 pr-2">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatBox title="Saldo em Conta" value={stats.balance} />
                 <StatBox title="Receitas (Pagas)" value={stats.income} color="text-emerald-500" />
@@ -253,10 +273,10 @@
               </div>
 
               <div className="glass-card p-10">
-                <div className="flex justify-between items-center mb-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
                   <div>
                     <h3 className="text-xl font-black italic">Fluxo de <span className="text-gold">Caixa</span></h3>
-                    <div className="flex gap-4 mt-4">
+                    <div className="flex flex-wrap gap-4 mt-4">
                       <FilterBtn active={filter === 'all'} label="Tudo" onClick={() => setFilter('all')} />
                       <FilterBtn active={filter === 'income'} label="Entradas" onClick={() => setFilter('income')} />
                       <FilterBtn active={filter === 'expense'} label="Saídas" onClick={() => setFilter('expense')} />
@@ -266,23 +286,27 @@
                 </div>
 
                 <div className="space-y-4">
-                  {transactions.map(t => (
+                  {transactions.length === 0 ? (
+                    <div className="text-center py-20 text-white/10 uppercase font-black tracking-widest text-xs italic">
+                      Nenhuma transação encontrada
+                    </div>
+                  ) : transactions.map(t => (
                     <div key={t.id} className={`p-5 rounded-2xl flex justify-between items-center border transition-all ${t.status === 'pending' ? 'bg-red-500/5 border-red-500/20' : 'bg-white/[0.02] border-white/5'}`}>
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                          <ion-icon name={CATEGORIES[t.category] || 'help-outline'}></ion-icon>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                          <ion-icon name={CATEGORIES[t.category] || 'grid-outline'}></ion-icon>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-bold italic">{t.description}</p>
-                            <span className="category-tag">{t.category}</span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-bold italic truncate">{t.description}</p>
+                            <span className="category-tag shrink-0">{t.category}</span>
                           </div>
                           <p className="text-[9px] font-black uppercase text-white/20 tracking-widest">{t.date}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-6 shrink-0">
                         <div className="text-right">
-                          <p className={`font-black italic ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                          <p className={`font-black italic whitespace-nowrap ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
                             {t.type === 'income' ? '+' : '-'} R$ {Number(t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </p>
                           <button 
@@ -292,7 +316,7 @@
                             {t.status === 'paid' ? 'Confirmado' : 'Pendente (Clique p/ Pagar)'}
                           </button>
                         </div>
-                        <button onClick={async () => { if(confirm('Excluir?')) await supabaseClient.from('transactions').delete().eq('id', t.id); fetchData(); }} className="text-white/10 hover:text-red-500 transition-all">
+                        <button onClick={async () => { if(confirm('Excluir transação?')) { await supabaseClient.from('transactions').delete().eq('id', t.id); fetchData(); } }} className="text-white/10 hover:text-red-500 transition-all text-xl flex">
                           <ion-icon name="trash-outline"></ion-icon>
                         </button>
                       </div>
@@ -305,7 +329,7 @@
 
           {showModal && (
             <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[500] flex items-center justify-center p-6" onClick={() => setShowModal(false)}>
-              <div className="glass-card p-10 w-full max-w-lg" onClick={e => e.stopPropagation()}>
+              <div className="glass-card p-10 w-full max-w-lg border-white/10 shadow-2xl" onClick={e => e.stopPropagation()}>
                 <h3 className="text-2xl font-black italic mb-8">Novo <span className="text-gold">Registo</span></h3>
                 <form className="space-y-4" onSubmit={async (e) => {
                   e.preventDefault();
@@ -324,17 +348,17 @@
                   <div className="grid grid-cols-2 gap-2 p-1 bg-black rounded-xl border border-white/5">
                     <label className="flex-1 cursor-pointer">
                       <input type="radio" name="type" value="income" className="hidden peer" defaultChecked />
-                      <div className="py-2 text-center text-[9px] font-black uppercase peer-checked:bg-emerald-500/20 peer-checked:text-emerald-500 rounded-lg">Entrada</div>
+                      <div className="py-2 text-center text-[9px] font-black uppercase peer-checked:bg-emerald-500/20 peer-checked:text-emerald-500 rounded-lg transition-all">Entrada</div>
                     </label>
                     <label className="flex-1 cursor-pointer">
                       <input type="radio" name="type" value="expense" className="hidden peer" />
-                      <div className="py-2 text-center text-[9px] font-black uppercase peer-checked:bg-red-500/20 peer-checked:text-red-500 rounded-lg">Saída</div>
+                      <div className="py-2 text-center text-[9px] font-black uppercase peer-checked:bg-red-500/20 peer-checked:text-red-500 rounded-lg transition-all">Saída</div>
                     </label>
                   </div>
                   
-                  <input name="desc" placeholder="O que é?" className="input-field" required />
+                  <input name="desc" placeholder="Descrição (ex: Supermercado)" className="input-field" required />
                   <div className="grid grid-cols-2 gap-4">
-                    <input name="val" type="number" step="0.01" placeholder="Valor" className="input-field" required />
+                    <input name="val" type="number" step="0.01" placeholder="Valor R$" className="input-field" required />
                     <input name="date" type="date" className="input-field" defaultValue={new Date().toISOString().split('T')[0]} required />
                   </div>
                   
@@ -342,12 +366,15 @@
                     {Object.keys(CATEGORIES).map(c => <option key={c} value={c} className="bg-neutral-900">{c}</option>)}
                   </select>
 
-                  <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl cursor-pointer">
-                    <input type="checkbox" name="status" defaultChecked className="w-4 h-4 accent-gold" />
-                    <span className="text-[10px] font-black uppercase text-white/40">Já foi pago/recebido?</span>
+                  <label className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl cursor-pointer hover:bg-white/[0.04] transition-all">
+                    <input type="checkbox" name="status" defaultChecked className="w-5 h-5 accent-gold cursor-pointer" />
+                    <span className="text-[10px] font-black uppercase text-white/40">Pagamento já realizado?</span>
                   </label>
 
-                  <button type="submit" className="btn-gold w-full mt-4">Salvar Transação</button>
+                  <div className="flex gap-4 pt-4">
+                    <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-[10px] font-black uppercase text-white/20 hover:text-white transition-all">Cancelar</button>
+                    <button type="submit" className="btn-gold flex-[2]">Salvar Transação</button>
+                  </div>
                 </form>
               </div>
             </div>
@@ -364,16 +391,16 @@
     );
 
     const StatBox = ({ title, value, color }) => (
-      <div className="glass-card p-8 group hover:border-gold/30 transition-all">
+      <div className="glass-card p-8 group hover:border-gold/30 transition-all cursor-default">
         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 mb-3 italic">{title}</p>
         <h4 className={`text-2xl font-black italic tracking-tight ${color || 'text-white'}`}>
-          R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          R$ {(value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
         </h4>
       </div>
     );
 
     const FilterBtn = ({ label, active, onClick }) => (
-      <button onClick={onClick} className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${active ? 'bg-gold text-black' : 'bg-white/5 text-white/30 hover:text-white'}`}>
+      <button onClick={onClick} className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${active ? 'bg-gold text-black shadow-lg' : 'bg-white/5 text-white/30 hover:text-white border border-transparent hover:border-white/10'}`}>
         {label}
       </button>
     );
