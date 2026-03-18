@@ -3,25 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoneyForge Pro</title>
+  <title>MoneyForge Pro - Inteligência Financeira</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
     
+    :root {
+      --gold: #bf953f;
+      --gold-light: #fcf6ba;
+    }
+
     body { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
       background: #050505; color: white; margin: 0; overflow: hidden;
     }
 
-    .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
     
-    .gold-gradient {
+    .gold-text {
       background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -29,88 +35,88 @@
 
     .btn-gold {
       background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
-      color: #000; font-weight: 800; transition: 0.3s;
+      color: #000; font-weight: 800; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .btn-gold:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(191, 149, 63, 0.3); }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(191, 149, 63, 0.3); }
 
-    .nav-link { color: #64748b; transition: 0.2s; cursor: pointer; border-radius: 12px; }
-    .nav-link.active { background: rgba(191, 149, 63, 0.1); color: #facc15; }
+    .nav-item { color: #94a3b8; transition: 0.2s; cursor: pointer; border-radius: 16px; font-size: 0.8rem; font-weight: 600; }
+    .nav-item.active { background: rgba(191, 149, 63, 0.1); color: #facc15; }
 
-    .scroll-custom::-webkit-scrollbar { width: 4px; }
-    .scroll-custom::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.2); border-radius: 10px; }
+    .scroll-hide::-webkit-scrollbar { width: 4px; }
+    .scroll-hide::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.2); border-radius: 10px; }
 
-    .fade-in { animation: fadeIn 0.3s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .card-debt { background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); }
+    
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const SUPABASE_URL = "https://bicljinwvfmmjllnshcd.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpY2xqaW53dmZtbWpsbG5zaGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4Mzc3MDcsImV4cCI6MjA4OTQxMzcwN30.4YbAXUNq79BueSwct3RYKRI0eNJ0pWxMzM_VGTlhz6Q";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { useState, useEffect, useRef } = React;
 
     const App = () => {
-      const [user, setUser] = useState(null);
+      const [user, setUser] = useState({ email: 'usuario@moneyforge.pro', id: '123' }); // Mock para visualização imediata
       const [activeTab, setActiveTab] = useState('dashboard');
       const [sidebar, setSidebar] = useState(false);
-
-      useEffect(() => {
-        supabaseClient.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-      }, []);
-
-      if (!user) return <AuthPage onLogin={setUser} />;
+      const [currency, setCurrency] = useState('€');
 
       return (
-        <div className="flex h-screen w-full">
-          {/* Sidebar */}
-          <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 glass p-6 transition-all ${sidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-            <h1 className="text-xl font-extrabold italic mb-10">Money<span className="gold-gradient">Forge</span></h1>
-            
-            <nav className="space-y-1">
-              <MenuSection title="Principal" />
-              <MenuItem icon="grid-outline" label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-              <MenuItem icon="pie-chart-outline" label="Gráficos" active={activeTab === 'charts'} onClick={() => setActiveTab('charts')} />
+        <div className="flex h-screen w-full bg-[#050505]">
+          {/* Sidebar Lateral */}
+          <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass p-8 transition-transform duration-300 ${sidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+            <div className="flex items-center justify-between mb-12">
+              <h1 className="text-2xl font-black italic tracking-tighter">Money<span className="gold-text">Forge</span></h1>
+              <button onClick={() => setSidebar(false)} className="lg:hidden text-2xl text-gray-500"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+
+            <nav className="space-y-1 overflow-y-auto scroll-hide h-[calc(100vh-200px)]">
+              <SectionTitle title="Principal" />
+              <NavItem icon="grid-outline" label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+              <NavItem icon="analytics-outline" label="Gráficos & Tendências" active={activeTab === 'charts'} onClick={() => setActiveTab('charts')} />
               
-              <MenuSection title="Gestão" />
-              <MenuItem icon="sync-outline" label="Assinaturas" active={activeTab === 'subs'} onClick={() => setActiveTab('subs')} />
-              <MenuItem icon="trending-down-outline" label="Dívidas" active={activeTab === 'debts'} onClick={() => setActiveTab('debts')} />
-              <MenuItem icon="rocket-outline" label="Planeamento" active={activeTab === 'plan'} onClick={() => setActiveTab('plan')} />
+              <SectionTitle title="Gestão Inteligente" />
+              <NavItem icon="repeat-outline" label="Assinaturas / Recorrentes" active={activeTab === 'subs'} onClick={() => setActiveTab('subs')} />
+              <NavItem icon="wallet-outline" label="Dívidas & Empréstimos" active={activeTab === 'debts'} onClick={() => setActiveTab('debts')} />
+              <NavItem icon="calendar-number-outline" label="Planejamento" active={activeTab === 'plan'} onClick={() => setActiveTab('plan')} />
               
-              <MenuSection title="Sistema" />
-              <MenuItem icon="settings-outline" label="Definições" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+              <SectionTitle title="Configurações" />
+              <NavItem icon="settings-outline" label="Definições" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
             </nav>
 
-            <button onClick={() => supabaseClient.auth.signOut()} className="absolute bottom-6 left-6 text-red-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-              <ion-icon name="log-out-outline"></ion-icon> Terminar Sessão
-            </button>
+            <div className="absolute bottom-8 left-8 right-8">
+               <button className="flex items-center gap-3 text-red-400 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity">
+                  <ion-icon name="log-out-outline" style={{fontSize: '18px'}}></ion-icon> Sair do Sistema
+               </button>
+            </div>
           </aside>
 
-          {/* Main */}
-          <main className="flex-1 flex flex-col overflow-hidden bg-[#080808]">
-            <header className="p-6 lg:px-12 flex justify-between items-center">
-              <button onClick={() => setSidebar(true)} className="lg:hidden text-2xl"><ion-icon name="menu-outline"></ion-icon></button>
-              <h2 className="text-lg font-bold italic capitalize">{activeTab}</h2>
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-[10px] text-gray-500 font-bold uppercase">{user.email.split('@')[0]}</p>
-                  <p className="text-[9px] text-emerald-500 font-bold">Premium Active</p>
+          {/* Área Principal */}
+          <main className="flex-1 flex flex-col overflow-hidden relative">
+            <header className="p-8 flex justify-between items-center bg-[#050505]/80 backdrop-blur-md z-10">
+              <button onClick={() => setSidebar(true)} className="lg:hidden p-2 glass rounded-xl"><ion-icon name="menu-outline" size="large"></ion-icon></button>
+              <div className="hidden sm:block">
+                <h2 className="text-xl font-bold italic capitalize">{activeTab.replace('dashboard', 'Visão Geral').replace('subs', 'Assinaturas').replace('plan', 'Planejamento')}</h2>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-none">Status</p>
+                  <p className="text-xs font-bold text-emerald-400">Usuário Pro</p>
                 </div>
-                <div className="w-10 h-10 rounded-full btn-gold flex items-center justify-center text-sm uppercase">{user.email[0]}</div>
+                <div className="w-10 h-10 rounded-2xl btn-gold flex items-center justify-center text-sm">JS</div>
               </div>
             </header>
 
-            <section className="flex-1 overflow-y-auto p-6 lg:px-12 scroll-custom">
-              <div className="max-w-5xl mx-auto space-y-6 fade-in">
-                {activeTab === 'dashboard' && <Dashboard />}
-                {activeTab === 'charts' && <ChartsView />}
-                {activeTab === 'subs' && <SubscriptionsView />}
-                {activeTab === 'debts' && <DebtsView />}
-                {activeTab === 'plan' && <PlanningView />}
-                {activeTab === 'settings' && <SettingsView user={user} />}
+            <section className="flex-1 overflow-y-auto p-8 lg:px-16 scroll-hide pb-20">
+              <div className="max-w-5xl mx-auto fade-in">
+                {activeTab === 'dashboard' && <Dashboard currency={currency} />}
+                {activeTab === 'charts' && <ChartsView currency={currency} />}
+                {activeTab === 'subs' && <SubscriptionsView currency={currency} />}
+                {activeTab === 'debts' && <DebtsView currency={currency} />}
+                {activeTab === 'plan' && <PlanningView currency={currency} />}
+                {activeTab === 'settings' && <SettingsView currency={currency} setCurrency={setCurrency} user={user} />}
               </div>
             </section>
           </main>
@@ -118,145 +124,326 @@
       );
     };
 
-    const MenuSection = ({ title }) => <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em] mt-6 mb-2 ml-4">{title}</p>;
-    
-    const MenuItem = ({ icon, label, active, onClick }) => (
-      <div onClick={onClick} className={`nav-link flex items-center gap-3 px-4 py-3 text-xs font-semibold ${active ? 'active' : ''}`}>
-        <ion-icon name={icon} style={{fontSize: '18px'}}></ion-icon>
-        {label}
+    const NavItem = ({ icon, label, active, onClick }) => (
+      <div onClick={onClick} className={`nav-item flex items-center gap-4 px-5 py-4 ${active ? 'active' : 'hover:bg-white/5'}`}>
+        <ion-icon name={icon} style={{fontSize: '20px'}}></ion-icon>
+        <span>{label}</span>
       </div>
     );
 
-    // --- Componentes das Abas ---
+    const SectionTitle = ({ title }) => <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.25em] mt-8 mb-3 ml-5">{title}</p>;
 
-    const Dashboard = () => (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard title="Saldo Atual" value="€ 4.250,00" color="border-yellow-500" />
-        <StatCard title="Gastos do Mês" value="€ 1.120,50" color="border-red-500" />
-        <StatCard title="Previsão de Poupança" value="€ 850,00" color="border-emerald-500" />
+    // --- DASHBOARD ---
+    const Dashboard = ({ currency }) => (
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard title="Patrimônio" value={`${currency} 15.420,00`} trend="+12%" positive />
+          <StatCard title="Gastos Fixos" value={`${currency} 3.200,00`} trend="Mensal" />
+          <StatCard title="Economia Livre" value={`${currency} 2.150,00`} trend="+5%" positive />
+        </div>
         
-        <div className="md:col-span-2 glass p-8 rounded-[2rem]">
-          <h3 className="font-bold mb-6 italic">Fluxo de Caixa Semanal</h3>
-          <div className="h-40 flex items-end justify-between gap-2">
-            {[30, 60, 45, 90, 55, 75, 40].map((h, i) => (
-              <div key={i} className="flex-1 bg-white/5 rounded-lg relative group">
-                <div className="absolute bottom-0 w-full btn-gold rounded-lg transition-all" style={{height: `${h}%`}}></div>
-              </div>
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="glass p-8 rounded-[2.5rem] border border-white/5">
+             <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold italic">Fluxo de Caixa (7 dias)</h3>
+                <span className="text-[10px] text-emerald-500 font-bold uppercase">+2.5% vs semana anterior</span>
+             </div>
+             <div className="h-48 flex items-end justify-between gap-3">
+                {[40, 70, 45, 90, 65, 85, 50].map((h, i) => (
+                  <div key={i} className="flex-1 bg-white/5 rounded-t-xl relative group overflow-hidden">
+                    <div className="absolute bottom-0 w-full btn-gold transition-all duration-500" style={{height: `${h}%`}}></div>
+                  </div>
+                ))}
+             </div>
+             <div className="flex justify-between mt-4 text-[9px] text-gray-500 font-bold uppercase">
+                <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
+             </div>
+          </div>
+
+          <div className="glass p-8 rounded-[2.5rem] border border-white/5">
+             <h3 className="font-bold italic mb-6">Limites de Categoria</h3>
+             <div className="space-y-6">
+                <LimitBar label="Moradia" current={1200} total={1200} color="bg-blue-400" />
+                <LimitBar label="Alimentação" current={850} total={1000} color="bg-emerald-400" />
+                <LimitBar label="Lazer" current={420} total={500} color="bg-yellow-500" />
+                <LimitBar label="Saúde" current={150} total={300} color="bg-purple-400" />
+             </div>
           </div>
         </div>
+      </div>
+    );
 
-        <div className="glass p-8 rounded-[2rem]">
-          <h3 className="font-bold mb-4 italic">Alerta de Gastos</h3>
-          <div className="space-y-4">
-            <CategoryMini label="Lazer" p={85} />
-            <CategoryMini label="Alimentação" p={40} />
-            <CategoryMini label="Transporte" p={15} />
-          </div>
+    const StatCard = ({ title, value, trend, positive }) => (
+      <div className="glass p-8 rounded-[2rem] border border-white/5 relative overflow-hidden group">
+        <div className="relative z-10">
+          <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-2">{title}</p>
+          <h3 className="text-2xl font-black mb-2">{value}</h3>
+          <p className={`text-[10px] font-bold ${positive ? 'text-emerald-400' : 'text-gray-400'}`}>{trend}</p>
+        </div>
+        <div className="absolute -right-4 -bottom-4 text-white/5 text-6xl rotate-12 group-hover:rotate-0 transition-transform">
+          <ion-icon name="stats-chart"></ion-icon>
         </div>
       </div>
     );
 
-    const StatCard = ({ title, value, color }) => (
-      <div className={`glass p-6 rounded-3xl border-l-4 ${color}`}>
-        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mb-1">{title}</p>
-        <p className="text-2xl font-black">{value}</p>
-      </div>
-    );
-
-    const CategoryMini = ({ label, p }) => (
-      <div className="space-y-1">
-        <div className="flex justify-between text-[9px] font-bold uppercase"><span>{label}</span><span>{p}%</span></div>
-        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-          <div className="h-full btn-gold" style={{width: `${p}%`}}></div>
-        </div>
-      </div>
-    );
-
-    const SubscriptionsView = () => (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center"><h3 className="font-bold italic">Pagamentos Recorrentes</h3><button className="btn-gold px-4 py-2 rounded-xl text-[9px] uppercase">+ Novo</button></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <SubItem name="Netflix" price="€ 15,99" next="Dia 12" />
-          <SubItem name="Spotify" price="€ 10,99" next="Dia 20" />
-          <SubItem name="Academia" price="€ 35,00" next="Dia 01" />
-        </div>
-      </div>
-    );
-
-    const SubItem = ({ name, price, next }) => (
-      <div className="glass p-5 rounded-2xl flex justify-between items-center border border-white/5">
-        <div><p className="font-bold text-sm">{name}</p><p className="text-[10px] text-gray-500">{next}</p></div>
-        <p className="text-yellow-500 font-bold">{price}</p>
-      </div>
-    );
-
-    const DebtsView = () => (
-      <div className="glass p-8 rounded-[2rem] space-y-6">
-        <h3 className="font-bold italic">Controle de Quitação</h3>
-        <div className="p-6 bg-white/3 rounded-2xl border border-white/5">
-          <div className="flex justify-between mb-2"><span className="text-xs font-bold uppercase">Crédito Habitação</span><span className="text-yellow-500 text-xs font-bold">42% Pago</span></div>
-          <div className="h-3 bg-white/5 rounded-full overflow-hidden"><div className="h-full btn-gold w-[42%]"></div></div>
-          <div className="flex justify-between mt-4 text-[10px] text-gray-500 font-bold uppercase"><span>Pago: € 84.000</span><span>Total: € 200.000</span></div>
-        </div>
-      </div>
-    );
-
-    const PlanningView = () => (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass p-8 rounded-[2rem]">
-          <h3 className="font-bold mb-4 italic">Previsão 6 Meses</h3>
-          <p className="text-3xl font-black text-emerald-500">+ € 5.100,00</p>
-          <p className="text-xs text-gray-500 mt-2">Baseado no seu histórico de poupança atual.</p>
-        </div>
-      </div>
-    );
-
-    const SettingsView = ({ user }) => (
-      <div className="max-w-xl glass p-8 rounded-[2rem] space-y-6">
-        <h3 className="font-bold italic">Definições da Conta</h3>
-        <div className="space-y-4">
-          <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center">
-             <span className="text-xs font-bold uppercase text-gray-500">E-mail</span>
-             <span className="text-xs font-bold">{user.email}</span>
-          </div>
-          <button className="w-full btn-gold py-4 rounded-xl text-[10px] uppercase">Alterar Senha</button>
-          <button className="w-full py-4 rounded-xl text-[10px] uppercase border border-white/10 hover:bg-white/5">Limpar Todos os Dados</button>
-        </div>
-      </div>
-    );
-
-    const ChartsView = () => (
-      <div className="glass p-10 rounded-[2.5rem] flex flex-col items-center justify-center min-h-[300px] text-center">
-        <ion-icon name="stats-chart-outline" style={{fontSize: '48px', color: '#bf953f'}}></ion-icon>
-        <h3 className="mt-4 font-bold italic">Gráficos Detalhados</h3>
-        <p className="text-xs text-gray-500 max-w-xs mt-2 uppercase tracking-widest font-bold">Módulo em processamento de dados históricos...</p>
-      </div>
-    );
-
-    const AuthPage = ({ onLogin }) => {
-      const [email, setEmail] = useState('');
-      const [pass, setPass] = useState('');
-      const handle = async (e) => {
-        e.preventDefault();
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-        if (error) await supabaseClient.auth.signUp({ email, password: pass });
-        else onLogin(data.user);
-      };
+    const LimitBar = ({ label, current, total, color }) => {
+      const perc = (current / total) * 100;
       return (
-        <div className="h-screen flex items-center justify-center p-6 bg-[#050505]">
-          <div className="glass p-10 rounded-[3rem] w-full max-w-sm text-center">
-            <h1 className="text-3xl font-black italic mb-2">Money<span className="gold-gradient">Forge</span></h1>
-            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.3em] mb-8">Gestão Financeira de Elite</p>
-            <form onSubmit={handle} className="space-y-3">
-              <input type="email" placeholder="E-mail" className="w-full p-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm" onChange={e => setEmail(e.target.value)} />
-              <input type="password" placeholder="Senha" className="w-full p-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm" onChange={e => setPass(e.target.value)} />
-              <button className="w-full btn-gold py-4 rounded-xl text-[10px] uppercase tracking-widest mt-4">Entrar na Forja</button>
-            </form>
+        <div className="space-y-2">
+          <div className="flex justify-between text-[10px] font-bold uppercase">
+            <span className="text-gray-400">{label}</span>
+            <span>{current} / {total}</span>
+          </div>
+          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div className={`h-full ${color} transition-all duration-1000`} style={{width: `${perc}%`}}></div>
           </div>
         </div>
       );
     };
+
+    // --- GRÁFICOS DETALHADOS ---
+    const ChartsView = ({ currency }) => {
+      const canvasRef = useRef(null);
+      const pieRef = useRef(null);
+
+      useEffect(() => {
+        const ctx = canvasRef.current.getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+              label: 'Despesas',
+              data: [1200, 1900, 1500, 2100, 1800, 2400],
+              borderColor: '#bf953f',
+              backgroundColor: 'rgba(191, 149, 63, 0.1)',
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#666' } } }
+          }
+        });
+
+        const ctxPie = pieRef.current.getContext('2d');
+        new Chart(ctxPie, {
+          type: 'doughnut',
+          data: {
+            labels: ['Fixos', 'Variaveis', 'Lazer'],
+            datasets: [{
+              data: [50, 30, 20],
+              backgroundColor: ['#bf953f', '#3b82f6', '#10b981'],
+              borderWidth: 0
+            }]
+          },
+          options: { plugins: { legend: { position: 'bottom', labels: { color: '#888', font: { size: 10 } } } } }
+        });
+      }, []);
+
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 glass p-10 rounded-[3rem]">
+            <h3 className="text-xl font-bold italic mb-8">Evolução Mensal</h3>
+            <canvas ref={canvasRef} height="150"></canvas>
+          </div>
+          <div className="glass p-10 rounded-[3rem]">
+            <h3 className="text-xl font-bold italic mb-8">Composição</h3>
+            <canvas ref={pieRef}></canvas>
+          </div>
+        </div>
+      );
+    };
+
+    // --- ASSINATURAS ---
+    const SubscriptionsView = ({ currency }) => {
+      const subs = [
+        { name: 'Netflix Pro', price: 55.90, next: '12 de Out', icon: 'logo-netflix', color: 'text-red-500' },
+        { name: 'Spotify Duo', price: 24.90, next: '15 de Out', icon: 'musical-notes', color: 'text-emerald-500' },
+        { name: 'Academia VIP', price: 120.00, next: '05 de Out', icon: 'barbell', color: 'text-blue-500' },
+        { name: 'iCloud 2TB', price: 34.90, next: '22 de Out', icon: 'cloud', color: 'text-sky-400' },
+      ];
+
+      return (
+        <div className="space-y-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-2xl font-black italic">Recorrentes</h3>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Previsão: {currency} {subs.reduce((a,b)=>a+b.price, 0).toFixed(2)} / mês</p>
+            </div>
+            <button className="btn-gold px-6 py-3 rounded-2xl text-[10px] uppercase tracking-widest">+ Nova Assinatura</button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {subs.map((s, i) => (
+              <div key={i} className="glass p-6 rounded-3xl flex items-center justify-between group hover:border-yellow-500/30 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-2xl ${s.color}`}>
+                    <ion-icon name={s.icon}></ion-icon>
+                  </div>
+                  <div>
+                    <h4 className="font-bold">{s.name}</h4>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase">Vence em: {s.next}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-black text-yellow-500">{currency} {s.price.toFixed(2)}</p>
+                  <p className="text-[9px] text-gray-600 font-bold uppercase">Automático</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    // --- DÍVIDAS ---
+    const DebtsView = ({ currency }) => {
+      const debts = [
+        { name: 'Financiamento Carro', total: 45000, paid: 15200, parcels: '24/48', interest: '1.2%' },
+        { name: 'Empréstimo Reforma', total: 12000, paid: 8000, parcels: '08/12', interest: '0.8%' }
+      ];
+
+      return (
+        <div className="space-y-8">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {debts.map((d, i) => (
+                <div key={i} className="glass p-10 rounded-[2.5rem] card-debt border border-white/5">
+                   <div className="flex justify-between items-start mb-8">
+                      <div>
+                        <h4 className="text-xl font-black italic">{d.name}</h4>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase">Juros: {d.interest} ao mês</p>
+                      </div>
+                      <div className="px-3 py-1 bg-yellow-500/10 rounded-lg">
+                        <span className="text-[10px] font-black text-yellow-500 uppercase">{d.parcels}</span>
+                      </div>
+                   </div>
+
+                   <div className="space-y-2 mb-8">
+                      <div className="flex justify-between text-[10px] font-black uppercase">
+                        <span className="text-gray-500">Progresso de Quitação</span>
+                        <span className="text-emerald-400">{((d.paid/d.total)*100).toFixed(1)}%</span>
+                      </div>
+                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full btn-gold" style={{width: `${(d.paid/d.total)*100}%`}}></div>
+                      </div>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <p className="text-[9px] text-gray-600 font-black uppercase mb-1">Total Devido</p>
+                        <p className="text-lg font-black">{currency} {d.total.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-gray-600 font-black uppercase mb-1">Restante</p>
+                        <p className="text-lg font-black text-red-400">{currency} {(d.total - d.paid).toLocaleString()}</p>
+                      </div>
+                   </div>
+                </div>
+              ))}
+              <div className="glass p-10 rounded-[2.5rem] border-dashed border-2 border-white/10 flex flex-col items-center justify-center gap-4 text-gray-600 hover:text-yellow-500 cursor-pointer transition-all">
+                <ion-icon name="add-circle-outline" style={{fontSize: '48px'}}></ion-icon>
+                <p className="text-xs font-black uppercase tracking-widest">Simular Novo Empréstimo</p>
+              </div>
+           </div>
+        </div>
+      );
+    };
+
+    // --- PLANEJAMENTO ---
+    const PlanningView = ({ currency }) => (
+      <div className="space-y-8">
+        <div className="glass p-10 rounded-[3rem]">
+          <h3 className="text-xl font-bold italic mb-6">Previsão de Patrimônio</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+             <div className="p-6 bg-white/3 rounded-3xl border border-white/5">
+                <p className="text-[10px] text-gray-500 font-bold uppercase mb-4">Em 3 Meses</p>
+                <p className="text-2xl font-black text-emerald-400">+ {currency} 6.450</p>
+                <div className="h-1 w-12 bg-emerald-500/30 mt-2 rounded-full"></div>
+             </div>
+             <div className="p-6 bg-white/3 rounded-3xl border border-white/5">
+                <p className="text-[10px] text-gray-500 font-bold uppercase mb-4">Em 6 Meses</p>
+                <p className="text-2xl font-black text-emerald-400">+ {currency} 12.900</p>
+                <div className="h-1 w-12 bg-emerald-500/30 mt-2 rounded-full"></div>
+             </div>
+             <div className="p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20">
+                <p className="text-[10px] text-emerald-500 font-bold uppercase mb-4">Em 12 Meses</p>
+                <p className="text-2xl font-black text-emerald-400">+ {currency} 25.800</p>
+                <p className="text-[9px] text-emerald-500/50 font-bold mt-2 uppercase">Meta Anual</p>
+             </div>
+          </div>
+        </div>
+
+        <div className="glass p-10 rounded-[3rem] border border-yellow-500/10">
+          <h3 className="text-lg font-bold italic mb-6">Plano de Ação Semanal</h3>
+          <div className="space-y-4">
+            <CheckItem label="Reduzir gastos com alimentação fora em 15%" />
+            <CheckItem label="Aportar 200€ adicionais na reserva de emergência" checked />
+            <CheckItem label="Revisar assinaturas de streaming não utilizadas" />
+            <CheckItem label="Simular quitação antecipada do carro" />
+          </div>
+        </div>
+      </div>
+    );
+
+    const CheckItem = ({ label, checked }) => (
+      <div className="flex items-center gap-4 p-5 bg-white/2 rounded-2xl border border-white/5 group cursor-pointer hover:bg-white/5 transition-all">
+        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${checked ? 'bg-yellow-500 border-yellow-500' : 'border-white/10 group-hover:border-yellow-500/50'}`}>
+          {checked && <ion-icon name="checkmark" style={{color: '#000', fontWeight: 'bold'}}></ion-icon>}
+        </div>
+        <span className={`text-sm font-semibold ${checked ? 'text-gray-500 line-through' : ''}`}>{label}</span>
+      </div>
+    );
+
+    // --- CONFIGURAÇÕES ---
+    const SettingsView = ({ currency, setCurrency, user }) => (
+      <div className="max-w-2xl space-y-8">
+        <div className="glass p-10 rounded-[3rem]">
+          <h3 className="text-xl font-bold italic mb-10">Preferências do Sistema</h3>
+          
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Moeda de Exibição</label>
+                <select value={currency} onChange={(e)=>setCurrency(e.target.value)} className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none font-bold text-sm">
+                  <option value="€">Euro (€)</option>
+                  <option value="R$">Real (R$)</option>
+                  <option value="$">Dólar ($)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-1">Tema Visual</label>
+                <select className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none font-bold text-sm">
+                  <option>Deep Black (Padrão)</option>
+                  <option>Modern Light</option>
+                  <option>Midnight Blue</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="p-6 bg-white/2 border border-white/5 rounded-[2rem]">
+               <h4 className="text-xs font-black uppercase tracking-widest mb-4 text-gray-500">Dados da Conta</h4>
+               <div className="flex items-center gap-4 mb-6">
+                 <div className="w-14 h-14 rounded-full btn-gold flex items-center justify-center text-xl">JS</div>
+                 <div>
+                    <p className="font-bold">{user.email}</p>
+                    <p className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest">Nível: Investidor Pro</p>
+                 </div>
+               </div>
+               <div className="grid grid-cols-2 gap-4">
+                  <button className="py-4 glass rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10">Alterar Senha</button>
+                  <button className="py-4 glass rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10">Backup de Dados</button>
+               </div>
+            </div>
+
+            <div className="pt-4">
+               <button className="w-full py-5 btn-gold rounded-2xl text-[10px] font-black uppercase tracking-widest">Salvar Alterações</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
