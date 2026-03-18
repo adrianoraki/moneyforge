@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Script do Supabase corrigido -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
   <style>
@@ -19,7 +20,6 @@
     .loader { border: 2px solid rgba(191,149,63,0.1); border-top: 2px solid #bf953f; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
     
-    /* Fallback para evitar tela preta eterna */
     #no-render-notice {
       display: none;
       position: fixed;
@@ -43,16 +43,20 @@
 
   <div id="root"></div>
 
-  <script type="babel">
+  <script type="text/babel">
     const { useState, useEffect } = React;
     
-    // Configuração Supabase
+    // Configuração Supabase (Substituir se necessário)
     const SUPABASE_URL = 'https://onpdxpobidntgofqshlk.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ucGR4cG9iaWRudGdvZnFzaGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzYyMjAsImV4cCI6MjA1NjgxMjIyMH0.fK0A9-Y-vN4o7Jp3D0H6m0Qo9H_6O_oH_oH_oH_oH_o';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Esconder o aviso de erro se o React iniciar
-    document.getElementById('no-render-notice').style.display = 'none';
+    
+    // Inicialização segura do cliente
+    let supabaseClient;
+    try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+        console.error("Erro ao inicializar Supabase:", e);
+    }
 
     function App() {
       const [session, setSession] = useState(null);
@@ -64,21 +68,16 @@
       useEffect(() => {
         const checkSession = async () => {
           try {
+            if (!supabaseClient) throw new Error("Cliente Supabase não disponível.");
+
             const { data: { session: current }, error: sessionError } = await supabaseClient.auth.getSession();
             
             if (sessionError) throw sessionError;
 
             if (!current) {
-              // Se não houver sessão, tentamos o redirecionamento
-              console.warn("Sem sessão detectada, redirecionando...");
-              window.location.href = 'login.html';
-              
-              // Se o redirecionamento falhar (comum em previews), mostramos erro após 2s
-              setTimeout(() => {
-                if (!window.location.href.includes('login.html')) {
-                  setError("Sessão não encontrada. Por favor, aceda a login.html manualmente.");
-                }
-              }, 2000);
+              console.warn("Sem sessão detectada.");
+              // Em ambiente de preview, o redirecionamento pode falhar, então mostramos uma mensagem amigável
+              setError("Sessão não encontrada. Por favor, realize o login primeiro.");
             } else {
               setSession(current);
               await loadData();
@@ -110,22 +109,35 @@
 
       async function logout() {
         await supabaseClient.auth.signOut();
-        window.location.href = 'login.html';
+        window.location.reload(); // Recarregar para disparar a verificação de sessão
+      }
+
+      if (loading) {
+        return (
+          <div className="h-screen flex flex-col items-center justify-center bg-black">
+            <div className="loader mb-4"></div>
+            <p className="text-[10px] font-bold gold-text tracking-[0.3em] uppercase">A carregar MoneyForge...</p>
+          </div>
+        );
       }
 
       if (error) {
         return (
           <div className="h-screen flex flex-col items-center justify-center bg-black p-8 text-center">
-            <h1 className="text-2xl font-black gold-text mb-4">ERRO DE ACESSO</h1>
-            <p className="text-white/40 mb-8 max-w-sm">{error}</p>
-            <a href="login.html" className="bg-white/5 border border-white/10 px-6 py-3 rounded-xl uppercase text-[10px] font-bold tracking-widest hover:bg-white/10 transition-all">
-              Voltar ao Login
-            </a>
+            <div className="mb-6 text-yellow-600 text-5xl">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+            </div>
+            <h1 className="text-2xl font-black gold-text mb-4 uppercase tracking-tighter">Acesso Restrito</h1>
+            <p className="text-white/40 mb-8 max-w-sm text-sm">{error}</p>
+            <button 
+                onClick={() => window.location.reload()}
+                className="bg-[#bf953f] text-black px-8 py-3 rounded-xl uppercase text-[10px] font-black tracking-widest hover:brightness-110 transition-all"
+            >
+              Tentar Novamente
+            </button>
           </div>
         );
       }
-
-      if (loading) return <div className="h-screen flex items-center justify-center bg-black"><div className="loader"></div></div>;
 
       return (
         <div className="flex h-screen p-4 gap-4 animate-in fade-in duration-500">
@@ -153,7 +165,7 @@
             <header className="h-20 glass rounded-[24px] flex items-center justify-between px-8 shrink-0">
               <h2 className="text-sm font-black uppercase tracking-widest italic">{activeTab === 'home' ? 'Visão Geral' : 'Histórico Global'}</h2>
               <div className="flex items-center gap-4">
-                 <button className="bg-white/5 hover:bg-white/10 p-3 rounded-full text-lg flex items-center"><ion-icon name="notifications-outline"></ion-icon></button>
+                 <button className="bg-white/5 hover:bg-white/10 p-3 rounded-full text-lg flex items-center text-yellow-500/50"><ion-icon name="notifications-outline"></ion-icon></button>
               </div>
             </header>
 
@@ -161,18 +173,23 @@
               {data.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center opacity-20 italic">
                   <ion-icon name="cube-outline" style={{fontSize: '40px'}}></ion-icon>
-                  <p className="mt-2 text-sm">Sem registos encontrados.</p>
+                  <p className="mt-2 text-sm uppercase font-bold tracking-widest">Sem registos encontrados.</p>
                 </div>
               ) : (
                 <div className="grid gap-4">
                   {data.map(t => (
-                    <div key={t.id} className="p-4 bg-white/5 rounded-xl flex justify-between items-center border border-white/5 hover:bg-white/10 transition-all">
-                      <div>
-                        <p className="font-bold text-sm italic">{t.description}</p>
-                        <p className="text-[10px] text-white/20 uppercase font-bold">{t.category} • {t.date}</p>
+                    <div key={t.id} className="p-4 bg-white/5 rounded-xl flex justify-between items-center border border-white/5 hover:border-yellow-500/20 transition-all">
+                      <div className="flex items-center gap-4">
+                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-white/5 text-white/40'}`}>
+                            <ion-icon name={t.type === 'income' ? 'arrow-up-outline' : 'arrow-down-outline'}></ion-icon>
+                         </div>
+                         <div>
+                            <p className="font-bold text-sm italic">{t.description}</p>
+                            <p className="text-[10px] text-white/20 uppercase font-bold tracking-tighter">{t.category} • {new Date(t.date).toLocaleDateString('pt-PT')}</p>
+                         </div>
                       </div>
-                      <div className={`font-black italic ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                        {t.type === 'income' ? '+' : '-'} R$ {Number(t.value).toFixed(2)}
+                      <div className={`font-black italic text-sm ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                        {t.type === 'income' ? '+' : '-'} {Number(t.value).toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
                       </div>
                     </div>
                   ))}
@@ -184,14 +201,10 @@
       );
     }
 
-    // Renderização com Catch para segurança
-    try {
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
-    } catch (e) {
-      document.getElementById('no-render-notice').style.display = 'flex';
-      console.error("Erro Crítico no React:", e);
-    }
+    // Renderização inicial
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
   </script>
 </body>
 </html>
