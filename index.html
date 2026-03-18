@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoneyForge Pro | Financial Intelligence</title>
+  <title>MoneyForge Pro | Intelligence & Wealth</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
@@ -15,157 +15,74 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap');
     
     :root {
-      --gold-primary: #bf953f;
-      --gold-secondary: #fcf6ba;
-      --gold-tertiary: #b38728;
-      --dark-bg: #0a0a0a;
-      --glass-bg: rgba(18, 18, 18, 0.8);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --gold: #bf953f;
+      --gold-light: #fcf6ba;
+      --dark: #050505;
+      --glass: rgba(18, 18, 18, 0.9);
+      --border: rgba(255, 255, 255, 0.05);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-font-smoothing: antialiased;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
     body { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
-      background: var(--dark-bg);
+      background: var(--dark);
       color: #fff;
-      min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* Background Engine - Baseado na imagem image_6c553a.jpg */
-    .background-engine {
+    .bg-gradient-main {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at 50% 50%, rgba(20, 20, 20, 0.4) 0%, rgba(5, 5, 5, 1) 100%), 
-                  url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000&auto=format&fit=crop');
-      background-size: cover;
-      background-position: center;
+      background: radial-gradient(circle at 0% 0%, rgba(191, 149, 63, 0.05) 0%, transparent 50%),
+                  radial-gradient(circle at 100% 100%, rgba(191, 149, 63, 0.03) 0%, transparent 50%);
       z-index: -1;
     }
 
-    /* Auth Interface - Estilo image_6ccdb9.png */
-    .auth-container {
-      width: 100%;
-      max-width: 480px;
-      margin: auto;
-      padding: 3rem;
-      background: rgba(25, 25, 25, 0.6);
-      backdrop-filter: blur(25px);
-      border: 1px solid var(--glass-border);
-      border-radius: 40px;
-      box-shadow: 0 50px 100px rgba(0, 0, 0, 0.9);
-    }
-
-    .gold-gradient-text {
-      background: linear-gradient(to right, var(--gold-primary), var(--gold-secondary), var(--gold-tertiary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: inline-block;
-    }
-
-    .input-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 800;
-      color: rgba(255, 255, 255, 0.4);
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      margin-bottom: 10px;
-      margin-left: 4px;
-    }
-
-    .modern-input {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 18px 22px;
-      color: #fff;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .modern-input:focus {
-      outline: none;
-      border-color: var(--gold-primary);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .btn-gold-action {
-      width: 100%;
-      padding: 18px;
-      background: linear-gradient(to right, #e8c67d, #bf953f);
-      border: none;
-      border-radius: 50px;
-      color: #000;
-      font-weight: 800;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 10px 20px rgba(191, 149, 63, 0.2);
-    }
-
-    .btn-gold-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 30px rgba(191, 149, 63, 0.3);
-      filter: brightness(1.1);
-    }
-
-    /* Dashboard UI */
-    .glass-panel {
-      background: var(--glass-bg);
+    .glass-card {
+      background: var(--glass);
       backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--border);
       border-radius: 24px;
+      transition: border 0.3s ease;
     }
+    .glass-card:hover { border-color: rgba(191, 149, 63, 0.2); }
 
-    /* Menu Sidebar - Estilo image_6b7fa0.png */
     .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 24px;
-      border-radius: 16px;
-      color: #a0a0a0;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.3s;
-      cursor: pointer;
-      margin-bottom: 4px;
+      display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+      border-radius: 14px; color: #666; font-size: 13px; font-weight: 600;
+      transition: all 0.3s; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
     }
+    .nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.03); }
+    .nav-link.active { background: rgba(191, 149, 63, 0.1); color: var(--gold-light); }
 
-    .nav-link:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.03);
+    .btn-gold {
+      background: linear-gradient(135deg, #bf953f 0%, #8a6e2f 100%);
+      color: #000; font-weight: 800; font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.1em; padding: 14px 24px; border-radius: 50px;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(191, 149, 63, 0.2); }
 
-    .nav-link.active {
-      background: rgba(191, 149, 63, 0.15);
-      color: var(--gold-secondary);
+    .status-badge {
+      font-size: 9px; font-weight: 900; text-transform: uppercase; padding: 4px 10px; border-radius: 6px;
     }
+    .status-paid { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .status-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 
-    .nav-link ion-icon {
-      font-size: 20px;
+    .input-field {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px; color: #fff; font-size: 14px;
     }
+    .input-field:focus { outline: none; border-color: var(--gold); }
 
-    .custom-scroll::-webkit-scrollbar { width: 4px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.3); border-radius: 10px; }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
-    .reveal {
-      animation: revealAnim 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-    }
-
-    @keyframes revealAnim {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+      z-index: 100; display: flex; align-items: center; justify-content: center;
     }
   </style>
 </head>
@@ -173,504 +90,471 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
     const App = () => {
-      const [isLoggedIn, setIsLoggedIn] = useState(false);
-      const [authView, setAuthView] = useState('login');
-      const [loading, setLoading] = useState(false);
+      const [isLoggedIn, setIsLoggedIn] = useState(true); // Para facilitar o teu teste direto
       const [activeTab, setActiveTab] = useState('dashboard');
+      const [showModal, setShowModal] = useState(null); // 'transaction', 'subscription', 'debt'
+      const [editingItem, setEditingItem] = useState(null);
+
+      // Estados de Dados
       const [transactions, setTransactions] = useState([
-        { id: 1, desc: 'Assinatura Adobe Creative', val: 124.90, type: 'expense', cat: 'Software', date: '18/03/2024' },
-        { id: 2, desc: 'Dividendos PETR4', val: 850.00, type: 'income', cat: 'Investimentos', date: '17/03/2024' },
-        { id: 3, desc: 'Consultoria Estratégica', val: 4200.00, type: 'income', cat: 'Trabalho', date: '12/03/2024' }
+        { id: 1, desc: 'Salário Mensal', val: 5500.00, type: 'income', cat: 'Carreira', date: '2024-03-18', status: 'paid' },
+        { id: 2, desc: 'Aluguel Loft', val: 1200.00, type: 'expense', cat: 'Moradia', date: '2024-03-15', status: 'paid' },
+        { id: 3, desc: 'Restaurante Jantar', val: 250.00, type: 'expense', cat: 'Lazer', date: '2024-03-17', status: 'pending' },
+        { id: 4, desc: 'Supermercado', val: 450.00, type: 'expense', cat: 'Alimentação', date: '2024-03-16', status: 'paid' }
       ]);
-      const [showModal, setShowModal] = useState(null);
-      const [user, setUser] = useState({ firstName: 'Luis', plan: 'Membro Founder Elite' });
 
-      const handleAuth = (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setTimeout(() => {
-          setIsLoggedIn(true);
-          setLoading(false);
-        }, 800);
-      };
+      const [subscriptions, setSubscriptions] = useState([
+        { id: 1, name: 'Netflix Premium', val: 55.90, cycle: 'Mensal' },
+        { id: 2, name: 'Adobe Creative Cloud', val: 125.00, cycle: 'Mensal' }
+      ]);
 
-      const handleLogout = () => {
-        setIsLoggedIn(false);
-        setAuthView('login');
-      };
+      const [debts, setDebts] = useState([
+        { id: 1, name: 'Empréstimo Carro', total: 45000, paid: 15000, deadline: '2025-12-01' }
+      ]);
 
       const stats = useMemo(() => {
         const income = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.val, 0);
         const expense = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.val, 0);
-        return { total: income - expense, income, expense };
+        const pending = transactions.filter(t => t.status === 'pending').reduce((a, b) => a + b.val, 0);
+        
+        // Categorias para o gráfico
+        const cats = {};
+        transactions.filter(t => t.type === 'expense').forEach(t => {
+          cats[t.cat] = (cats[t.cat] || 0) + t.val;
+        });
+        
+        const topCategory = Object.entries(cats).sort((a,b) => b[1] - a[1])[0] || ["Nenhuma", 0];
+
+        return { total: income - expense, income, expense, pending, catData: cats, topCategory };
       }, [transactions]);
 
-      // --- LOGIN / CADASTRO ---
-      if (!isLoggedIn) {
-        return (
-          <div className="min-h-screen flex items-center justify-center p-6">
-            <div className="background-engine"></div>
-            <div className="auth-container reveal">
-              <div className="text-center mb-12">
-                <div className="flex justify-center mb-2">
-                   <h1 className="text-5xl font-extrabold tracking-tighter italic">
-                    Money<span className="text-gold-primary">Forge</span>
-                  </h1>
-                </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">
-                  Financial Intelligence Login
-                </p>
-              </div>
+      const handleSaveTransaction = (data) => {
+        if (editingItem) {
+          setTransactions(transactions.map(t => t.id === editingItem.id ? { ...data, id: t.id } : t));
+        } else {
+          setTransactions([{ ...data, id: Date.now() }, ...transactions]);
+        }
+        setShowModal(null);
+        setEditingItem(null);
+      };
 
-              <form onSubmit={handleAuth} className="space-y-6">
-                {authView === 'signup' && (
-                  <div className="grid grid-cols-2 gap-4 reveal">
-                    <div>
-                      <label className="input-label">Nome</label>
-                      <input type="text" className="modern-input" placeholder="Nome" required />
-                    </div>
-                    <div>
-                      <label className="input-label">Sobrenome</label>
-                      <input type="text" className="modern-input" placeholder="Sobrenome" required />
-                    </div>
-                  </div>
-                )}
+      const toggleStatus = (id) => {
+        setTransactions(transactions.map(t => 
+          t.id === id ? { ...t, status: t.status === 'paid' ? 'pending' : 'paid' } : t
+        ));
+      };
 
-                <div>
-                  <label className="input-label">E-mail Corporativo</label>
-                  <input type="email" className="modern-input" placeholder="seu@email.com" required />
-                </div>
-
-                <div className="relative">
-                  <label className="input-label">Senha de Acesso</label>
-                  <input type="password" className="modern-input" placeholder="••••••••" required />
-                  <div className="absolute right-5 bottom-4 text-white/20 cursor-pointer hover:text-white transition-colors">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                </div>
-
-                <button type="submit" disabled={loading} className="btn-gold-action mt-4">
-                  {loading ? "Processando..." : (authView === 'login' ? 'Entrar no Sistema' : 'Criar Conta Premium')}
-                </button>
-              </form>
-
-              <div className="mt-12 text-center">
-                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-3">
-                  {authView === 'login' ? 'Ainda não é membro?' : 'Já possui acesso?'}
-                </p>
-                <button 
-                  onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
-                  className="text-gold-primary text-[11px] font-black uppercase tracking-widest hover:brightness-125 transition-all"
-                >
-                  {authView === 'login' ? 'Solicitar Convite de Cadastro' : 'Voltar para o Login'}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      // --- MAIN DASHBOARD ---
       return (
-        <div className="flex h-screen bg-[#050505] overflow-hidden md:p-6 gap-6 relative">
-          <div className="background-engine opacity-20"></div>
-          
-          {/* Sidebar - Incluindo os novos menus image_6b7fa0.png */}
-          <aside className="hidden lg:flex w-72 h-full glass-panel flex-col p-6 reveal shrink-0">
-            <div className="mb-10 px-4">
-              <h2 className="text-2xl font-black italic tracking-tighter">Money<span className="gold-gradient-text">Forge</span></h2>
-              <p className="text-[9px] text-white/20 font-bold uppercase tracking-[0.2em] mt-1">Intelligence Division</p>
+        <div className="flex h-screen overflow-hidden">
+          <div className="bg-gradient-main"></div>
+
+          {/* Sidebar */}
+          <aside className="w-80 glass-card m-6 flex flex-col p-8 shrink-0">
+            <div className="mb-12">
+              <h1 className="text-2xl font-black italic tracking-tighter">Money<span className="text-[#bf953f]">Forge</span></h1>
+              <p className="text-[8px] text-white/20 font-black uppercase tracking-[.4em] mt-1">Private Wealth Management</p>
             </div>
 
-            <nav className="flex-1 space-y-1 overflow-y-auto custom-scroll px-2">
-              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-6 mb-3 ml-4">Operacional</p>
-              <NavLink label="Nova Transação" icon="add-circle-outline" active={activeTab === 'new_tx'} onClick={() => setShowModal('tx')} />
+            <nav className="flex-1 space-y-2">
               <NavLink label="Dashboard" icon="grid-outline" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-              <NavLink label="Histórico" icon="list-outline" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
-              <NavLink label="Metas" icon="flag-outline" active={activeTab === 'metas'} onClick={() => setActiveTab('metas')} />
-              
-              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">Análises</p>
-              <NavLink label="Estatísticas" icon="bar-chart-outline" active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
-              <NavLink label="Assinaturas" icon="calendar-outline" active={activeTab === 'subscriptions'} onClick={() => setActiveTab('subscriptions')} />
-              
-              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">Financeiro</p>
-              <NavLink label="Planejamento" icon="map-outline" active={activeTab === 'planning'} onClick={() => setActiveTab('planning')} />
-              <NavLink label="Dívidas" icon="card-outline" active={activeTab === 'debts'} onClick={() => setActiveTab('debts')} />
-              
-              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">Sistema</p>
-              <NavLink label="Configurações" icon="settings-outline" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+              <NavLink label="Histórico" icon="receipt-outline" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
+              <NavLink label="Assinaturas" icon="calendar-outline" active={activeTab === 'subs'} onClick={() => setActiveTab('subs')} />
+              <NavLink label="Dívidas" icon="wallet-outline" active={activeTab === 'debts'} onClick={() => setActiveTab('debts')} />
+              <NavLink label="Definições" icon="settings-outline" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
             </nav>
 
-            <div className="mt-6 pt-6 border-t border-white/5 px-2">
-              <button onClick={handleLogout} className="w-full flex items-center gap-4 px-6 py-4 rounded-xl hover:bg-red-500/10 text-red-500 transition-all text-[11px] font-black uppercase tracking-widest">
-                <ion-icon name="power-outline"></ion-icon> Logout
-              </button>
-            </div>
+            <button className="mt-auto flex items-center gap-3 text-red-500/40 hover:text-red-500 text-[10px] font-black uppercase tracking-widest transition-all">
+              <ion-icon name="log-out-outline"></ion-icon> Encerrar Sessão
+            </button>
           </aside>
 
-          {/* Content Area */}
-          <main className="flex-1 flex flex-col gap-6 h-full p-4 md:p-0 overflow-y-auto custom-scroll">
-            <header className="glass-panel p-6 flex justify-between items-center reveal shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5 flex items-center justify-center font-bold text-gold-primary">
-                  {user.firstName.charAt(0)}
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm tracking-tight">Luis Campos</h3>
-                  <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">Acesso Elite</p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <button onClick={() => setShowModal('tx')} className="btn-gold-action !py-2.5 px-6 !w-auto text-[10px]">
-                  Nova Transação
-                </button>
-              </div>
-            </header>
+          {/* Main Content */}
+          <main className="flex-1 py-6 pr-6 flex flex-col gap-6 overflow-y-auto overflow-x-hidden">
+            <Header onNew={() => { setEditingItem(null); setShowModal('transaction'); }} />
 
-            <div className="flex-1">
-              {renderActiveTab()}
+            <div className="space-y-6 pb-12">
+              {activeTab === 'dashboard' && <Dashboard stats={stats} transactions={transactions} />}
+              {activeTab === 'history' && (
+                <History 
+                  transactions={transactions} 
+                  stats={stats} 
+                  onEdit={(t) => { setEditingItem(t); setShowModal('transaction'); }}
+                  onDelete={(id) => setTransactions(transactions.filter(t => t.id !== id))}
+                  onToggleStatus={toggleStatus}
+                />
+              )}
+              {activeTab === 'subs' && (
+                <Subscriptions 
+                  items={subscriptions} 
+                  onAdd={() => setShowModal('subscription')}
+                  onEdit={(s) => { setEditingItem(s); setShowModal('subscription'); }}
+                />
+              )}
+              {activeTab === 'debts' && (
+                <Debts 
+                  items={debts} 
+                  onAdd={() => setShowModal('debt')}
+                  onEdit={(d) => { setEditingItem(d); setShowModal('debt'); }}
+                />
+              )}
             </div>
           </main>
 
-          {showModal === 'tx' && (
+          {/* Modais */}
+          {showModal === 'transaction' && (
             <TransactionModal 
+              item={editingItem} 
               onClose={() => setShowModal(null)} 
-              onSave={(t) => {setTransactions([t, ...transactions]); setShowModal(null);}} 
+              onSave={handleSaveTransaction} 
             />
+          )}
+          
+          {(showModal === 'subscription' || showModal === 'debt') && (
+            <div className="modal-backdrop">
+              <div className="glass-card p-10 w-full max-w-md">
+                <h3 className="text-xl font-bold mb-6">Em desenvolvimento</h3>
+                <button onClick={() => setShowModal(null)} className="btn-gold w-full">Voltar</button>
+              </div>
+            </div>
           )}
         </div>
       );
-
-      function renderActiveTab() {
-        switch(activeTab) {
-          case 'dashboard': return <DashboardView stats={stats} transactions={transactions} />;
-          case 'analytics': return <AnalyticsView transactions={transactions} />;
-          case 'subscriptions': return <SubscriptionsView />;
-          case 'planning': return <PlanningView />;
-          case 'debts': return <DebtsView />;
-          case 'settings': return <SettingsView />;
-          case 'history': return <HistoryView transactions={transactions} />;
-          case 'metas': return <GoalsView />;
-          default: return <DashboardView stats={stats} transactions={transactions} />;
-        }
-      }
     };
 
-    // --- COMPONENTES DAS PÁGINAS ---
+    // --- SUB-COMPONENTES ---
+
+    const Header = ({ onNew }) => (
+      <header className="glass-card p-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-sm font-black uppercase tracking-widest text-white/40">Bem-vindo de volta,</h2>
+          <p className="text-lg font-bold italic">Luis Campos</p>
+        </div>
+        <button onClick={onNew} className="btn-gold flex items-center gap-2">
+          <ion-icon name="add-outline"></ion-icon> Nova Transação
+        </button>
+      </header>
+    );
 
     const NavLink = ({ label, icon, active, onClick }) => (
       <div onClick={onClick} className={`nav-link ${active ? 'active' : ''}`}>
-        <ion-icon name={icon}></ion-icon>
+        <ion-icon name={icon} style={{fontSize: '18px'}}></ion-icon>
         <span>{label}</span>
       </div>
     );
 
-    const DashboardView = ({ stats, transactions }) => (
-      <div className="space-y-6 reveal pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard title="Saldo Consolidado" value={stats.total} icon="wallet-outline" color="text-white" />
-          <StatCard title="Entradas" value={stats.income} icon="trending-up-outline" color="text-emerald-500" />
-          <StatCard title="Saídas" value={stats.expense} icon="trending-down-outline" color="text-red-500" />
+    const StatCard = ({ title, value, color, icon }) => (
+      <div className="glass-card p-8 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-4 opacity-5 text-4xl group-hover:scale-110 transition-transform">
+          <ion-icon name={icon}></ion-icon>
         </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-          <div className="xl:col-span-3 glass-panel p-8 h-[350px]">
-             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-8">Performance do Patrimônio</h4>
-             <FinancialChart />
-          </div>
-          <div className="xl:col-span-2 glass-panel p-8">
-             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-8">Evolução de Metas</h4>
-             <div className="space-y-6">
-               <ProgressBar label="Liberdade Financeira" progress={68} color="bg-gold-primary" />
-               <ProgressBar label="Reserva de Emergência" progress={92} color="bg-emerald-500" />
-               <ProgressBar label="Compra Imóvel" progress={15} color="bg-blue-500" />
-             </div>
-          </div>
-        </div>
-
-        <div className="glass-panel p-8">
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-6">Fluxo Recente</h4>
-          <div className="space-y-3">
-            {transactions.map(t => (
-              <div key={t.id} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-xl">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${t.type === 'income' ? 'text-emerald-500 bg-emerald-500/10' : 'text-white bg-white/5'}`}>
-                    <ion-icon name={t.type === 'income' ? 'arrow-up' : 'arrow-down'}></ion-icon>
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">{t.desc}</p>
-                    <p className="text-[9px] text-white/20 font-black uppercase mt-1">{t.cat} • {t.date}</p>
-                  </div>
-                </div>
-                <p className={`font-black ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                  {t.type === 'income' ? '+' : '-'} R$ {t.val.toLocaleString('pt-BR')}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4">{title}</p>
+        <h3 className={`text-2xl font-black italic ${color}`}>R$ {value.toLocaleString('pt-PT', {minimumFractionDigits: 2})}</h3>
       </div>
     );
 
-    const HistoryView = ({ transactions }) => (
-      <div className="space-y-6 reveal">
-        <h2 className="text-2xl font-black italic">Histórico de <span className="gold-gradient-text">Transações</span></h2>
-        <div className="glass-panel p-8 overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-white/5 text-[10px] font-black uppercase text-white/20 tracking-widest">
-                <th className="pb-4">Data</th>
-                <th className="pb-4">Descrição</th>
-                <th className="pb-4">Categoria</th>
-                <th className="pb-4 text-right">Valor</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              {transactions.map(t => (
-                <tr key={t.id} className="border-b border-white/[0.02] hover:bg-white/[0.01]">
-                  <td className="py-4 text-white/40">{t.date}</td>
-                  <td className="py-4 font-bold">{t.desc}</td>
-                  <td className="py-4"><span className="px-2 py-1 bg-white/5 rounded-md text-[10px] uppercase font-bold text-white/40">{t.cat}</span></td>
-                  <td className={`py-4 text-right font-black ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                    R$ {t.val.toLocaleString('pt-BR')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-
-    const GoalsView = () => (
-      <div className="space-y-6 reveal">
-        <h2 className="text-2xl font-black italic">Metas <span className="gold-gradient-text">Financeiras</span></h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <GoalCard title="Reserva de Emergência" current={12000} total={20000} icon="shield-checkmark-outline" />
-          <GoalCard title="Viagem Europa" current={4500} total={15000} icon="airplane-outline" />
-          <GoalCard title="Troca de Carro" current={30000} total={80000} icon="car-outline" />
-          <div className="glass-panel p-8 flex flex-col items-center justify-center border-dashed border-white/10 hover:border-gold-primary transition-all cursor-pointer">
-            <ion-icon name="add-outline" style={{fontSize: '30px'}} className="text-white/20 mb-2"></ion-icon>
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Criar Nova Meta</p>
-          </div>
-        </div>
-      </div>
-    );
-
-    const GoalCard = ({ title, current, total, icon }) => (
-      <div className="glass-panel p-8">
-        <div className="flex justify-between items-center mb-6">
-          <div className="w-12 h-12 bg-gold-primary/10 rounded-2xl flex items-center justify-center text-2xl text-gold-primary">
-            <ion-icon name={icon}></ion-icon>
-          </div>
-          <div className="text-right">
-            <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">Progresso</p>
-            <h5 className="font-black text-gold-primary">{Math.round((current/total)*100)}%</h5>
-          </div>
-        </div>
-        <h4 className="font-bold italic mb-4">{title}</h4>
-        <ProgressBar label={`R$ ${current.toLocaleString()} / R$ ${total.toLocaleString()}`} progress={(current/total)*100} color="bg-gold-primary" />
-      </div>
-    );
-
-    const AnalyticsView = ({ transactions }) => (
-      <div className="space-y-6 reveal">
-        <h2 className="text-2xl font-black italic">Análises <span className="gold-gradient-text">Avançadas</span></h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-panel p-10 min-h-[350px]">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-8">Despesas por Categoria</h4>
-            <div className="h-64 flex items-center justify-center text-white/10 text-[10px] font-black uppercase italic tracking-widest">
-              Gráfico de Distribuição
-            </div>
-          </div>
-          <div className="glass-panel p-10 min-h-[350px]">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-8">Evolução Mensal</h4>
-            <FinancialChart />
-          </div>
-        </div>
-      </div>
-    );
-
-    const SubscriptionsView = () => (
-      <div className="space-y-6 reveal">
-        <h2 className="text-2xl font-black italic">Pagamentos <span className="gold-gradient-text">Recorrentes</span></h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <SubscriptionItem name="Netflix" price={55.90} date="Todo dia 10" icon="logo-netflix" color="text-red-500" />
-          <SubscriptionItem name="Spotify" price={21.90} date="Todo dia 15" icon="musical-notes-outline" color="text-emerald-500" />
-          <SubscriptionItem name="Academia" price={129.90} date="Todo dia 01" icon="barbell-outline" color="text-white" />
-        </div>
-      </div>
-    );
-
-    const PlanningView = () => (
-      <div className="space-y-6 reveal">
-        <h2 className="text-2xl font-black italic">Planejamento <span className="gold-gradient-text">Estratégico</span></h2>
-        <div className="glass-panel p-10">
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-8">Distribuição Ideal (50/30/20)</h4>
-          <div className="space-y-8">
-            <ProgressBar label="Essenciais (50%)" progress={48} color="bg-emerald-500" />
-            <ProgressBar label="Estilo de Vida (30%)" progress={32} color="bg-gold-primary" />
-            <ProgressBar label="Investimentos (20%)" progress={20} color="bg-blue-500" />
-          </div>
-        </div>
-      </div>
-    );
-
-    const DebtsView = () => (
-      <div className="space-y-6 reveal">
-        <h2 className="text-2xl font-black italic">Controle de <span className="gold-gradient-text">Dívidas</span></h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="glass-panel p-8">
-              <div className="flex justify-between items-center mb-4">
-                <h5 className="font-bold">Financiamento Imobiliário</h5>
-                <span className="text-[10px] font-bold text-white/30 uppercase">Faltam 312 Meses</span>
-              </div>
-              <ProgressBar label="R$ 45.000 pagos de R$ 350.000" progress={12.8} color="bg-red-500" />
-            </div>
-          </div>
-          <div className="glass-panel p-8 flex flex-col justify-center text-center">
-            <p className="text-[10px] font-black text-white/20 uppercase mb-4">Total Devido</p>
-            <h3 className="text-3xl font-black text-red-500">R$ 305.000</h3>
-          </div>
-        </div>
-      </div>
-    );
-
-    const SettingsView = () => (
-      <div className="space-y-6 reveal">
-        <h2 className="text-2xl font-black italic">Ajustes do <span className="gold-gradient-text">Sistema</span></h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-panel p-10 space-y-6">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic">Dados Pessoais</h4>
-            <div>
-              <label className="input-label">Nome de Exibição</label>
-              <input type="text" className="modern-input" defaultValue="Luis Campos" />
-            </div>
-            <div>
-              <label className="input-label">Moeda Principal</label>
-              <select className="modern-input">
-                <option>BRL - Real Brasileiro (R$)</option>
-                <option>USD - Dólar Americano ($)</option>
-              </select>
-            </div>
-            <button className="btn-gold-action !w-auto px-10">Salvar Perfil</button>
-          </div>
-          <div className="glass-panel p-10 space-y-6">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic">Segurança</h4>
-            <div className="space-y-4">
-              <input type="password" className="modern-input" placeholder="Senha Atual" />
-              <input type="password" className="modern-input" placeholder="Nova Senha" />
-            </div>
-            <button className="btn-gold-action !w-auto px-10 !bg-white/5 !text-white border border-white/10">Alterar Senha</button>
-          </div>
-        </div>
-      </div>
-    );
-
-    // --- SUBCOMPONETES GERAIS ---
-
-    const StatCard = ({ title, value, icon, color }) => (
-      <div className="glass-panel p-8 group hover:border-gold-primary/30 transition-all">
-        <div className="flex justify-between items-start mb-6">
-          <p className="text-[9px] text-white/30 font-black uppercase tracking-[0.3em]">{title}</p>
-          <div className={`text-2xl opacity-30 ${color}`}><ion-icon name={icon}></ion-icon></div>
-        </div>
-        <h3 className="text-2xl font-black italic">R$ {value.toLocaleString('pt-BR')}</h3>
-      </div>
-    );
-
-    const SubscriptionItem = ({ name, price, date, icon, color }) => (
-      <div className="glass-panel p-8 group hover:border-gold-primary/20 transition-all">
-        <div className="flex justify-between items-center mb-6">
-          <div className={`text-3xl ${color}`}><ion-icon name={icon}></ion-icon></div>
-          <span className="text-[9px] font-black text-white/20 uppercase">{date}</span>
-        </div>
-        <h4 className="font-bold text-lg mb-1">{name}</h4>
-        <p className="text-xl font-black">R$ {price.toFixed(2)}</p>
-      </div>
-    );
-
-    const ProgressBar = ({ label, progress, color }) => (
-      <div className="space-y-3">
-        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/40">
-          <span>{label}</span>
-          <span>{Math.round(progress)}%</span>
-        </div>
-        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-          <div className={`h-full ${color} rounded-full transition-all duration-1000`} style={{width: `${progress}%`}}></div>
-        </div>
-      </div>
-    );
-
-    const FinancialChart = () => {
+    const Dashboard = ({ stats, transactions }) => {
       const chartRef = useRef(null);
+
       useEffect(() => {
-        const ctx = chartRef.current.getContext('2d');
-        const chart = new Chart(ctx, {
-          type: 'line',
+        const ctx = document.getElementById('expenseChart');
+        if (!ctx) return;
+        
+        if (chartRef.current) chartRef.current.destroy();
+
+        const labels = Object.keys(stats.catData);
+        const data = Object.values(stats.catData);
+
+        chartRef.current = new Chart(ctx, {
+          type: 'doughnut',
           data: {
-            labels: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN'],
+            labels: labels,
             datasets: [{
-              data: [12000, 19000, 15000, 25000, 22000, 30000],
-              borderColor: '#bf953f',
-              borderWidth: 3,
-              tension: 0.4,
-              pointRadius: 0,
-              fill: true,
-              backgroundColor: 'rgba(191, 149, 63, 0.05)'
+              data: data,
+              backgroundColor: ['#bf953f', '#fcf6ba', '#8a6e2f', '#444', '#222'],
+              borderWidth: 0,
+              hoverOffset: 10
             }]
           },
           options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            cutout: '80%',
             plugins: { legend: { display: false } },
-            scales: { 
-              x: { grid: { display: false }, border: { display: false }, ticks: { color: 'rgba(255,255,255,0.2)', font: { size: 9, weight: '800' } } },
-              y: { display: false }
-            }
+            responsive: true,
+            maintainAspectRatio: false
           }
         });
-        return () => chart.destroy();
-      }, []);
-      return <div className="h-full w-full"><canvas ref={chartRef}></canvas></div>;
+      }, [stats]);
+
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <StatCard title="Liquidez Total" value={stats.total} icon="wallet-outline" />
+              <StatCard title="Pendente" value={stats.pending} color="text-amber-500" icon="time-outline" />
+            </div>
+            
+            <div className="glass-card p-10">
+              <h4 className="text-[11px] font-black uppercase tracking-[.3em] text-white/20 mb-10 italic">Análise de Fluxo</h4>
+              <div className="h-[250px] relative flex items-center justify-center">
+                <canvas id="expenseChart"></canvas>
+                <div className="absolute text-center">
+                  <p className="text-[9px] font-black uppercase text-white/20">Maior Gasto</p>
+                  <p className="text-xl font-bold text-gold">{stats.topCategory[0]}</p>
+                </div>
+              </div>
+              <div className="mt-10 grid grid-cols-2 gap-4">
+                {Object.entries(stats.catData).map(([cat, val], i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                    <span className="text-[10px] font-bold uppercase text-white/40">{cat}</span>
+                    <span className="text-xs font-black italic">R$ {val.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="glass-card p-10 h-full">
+              <h4 className="text-[11px] font-black uppercase tracking-[.3em] text-white/20 mb-8 italic">Atividade Recente</h4>
+              <div className="space-y-6">
+                {transactions.slice(0, 5).map(t => (
+                  <div key={t.id} className="flex items-center gap-4 group">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-white/5 text-white/40'}`}>
+                      <ion-icon name={t.type === 'income' ? 'arrow-up-outline' : 'arrow-down-outline'}></ion-icon>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold italic truncate">{t.desc}</p>
+                      <p className="text-[9px] text-white/20 uppercase font-black">{t.cat}</p>
+                    </div>
+                    <p className={`text-xs font-black ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                      {t.type === 'income' ? '+' : '-'} R$ {t.val}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
     };
 
-    const TransactionModal = ({ onClose, onSave }) => {
-      const [f, setF] = useState({ desc: '', val: '', type: 'expense', cat: 'Operacional' });
-      return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={onClose}>
-          <div className="auth-container !max-w-md !p-12 reveal shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-xl font-black italic mb-10">Novo <span className="gold-gradient-text">Lançamento</span></h3>
-            <div className="space-y-5">
-              <div>
-                <label className="input-label">Descrição da Transação</label>
-                <input type="text" className="modern-input" placeholder="Ex: Aporte Mensal" value={f.desc} onChange={e => setF({...f, desc: e.target.value})} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+    const History = ({ transactions, stats, onEdit, onDelete, onToggleStatus }) => (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard title="Saldo Consolidado" value={stats.total} icon="cube-outline" />
+          <StatCard title="Total de Entradas" value={stats.income} color="text-emerald-500" icon="trending-up-outline" />
+          <StatCard title="Total de Saídas" value={stats.expense} color="text-red-500" icon="trending-down-outline" />
+        </div>
+
+        <div className="glass-card p-10">
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="text-2xl font-black italic">Fluxo de <span className="text-gold">Caixa</span></h2>
+            <div className="flex gap-2">
+              <button className="w-10 h-10 glass-card flex items-center justify-center text-white/40 hover:text-white transition-all"><ion-icon name="filter-outline"></ion-icon></button>
+              <button className="w-10 h-10 glass-card flex items-center justify-center text-white/40 hover:text-white transition-all"><ion-icon name="download-outline"></ion-icon></button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="pb-6 text-[10px] font-black uppercase text-white/20 tracking-widest">Data</th>
+                  <th className="pb-6 text-[10px] font-black uppercase text-white/20 tracking-widest">Descrição</th>
+                  <th className="pb-6 text-[10px] font-black uppercase text-white/20 tracking-widest">Categoria</th>
+                  <th className="pb-6 text-[10px] font-black uppercase text-white/20 tracking-widest">Status</th>
+                  <th className="pb-6 text-[10px] font-black uppercase text-white/20 tracking-widest text-right">Valor</th>
+                  <th className="pb-6 text-[10px] font-black uppercase text-white/20 tracking-widest text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {transactions.map(t => (
+                  <tr key={t.id} className="group hover:bg-white/[0.01] transition-all">
+                    <td className="py-6 text-xs text-white/40 font-bold">{t.date}</td>
+                    <td className="py-6 font-bold italic text-sm">{t.desc}</td>
+                    <td className="py-6">
+                      <span className="text-[10px] font-black uppercase bg-white/5 px-3 py-1 rounded-full text-white/60">{t.cat}</span>
+                    </td>
+                    <td className="py-6">
+                      <button onClick={() => onToggleStatus(t.id)} className={`status-badge ${t.status === 'paid' ? 'status-paid' : 'status-pending'}`}>
+                        {t.status === 'paid' ? 'Pago' : 'Pendente'}
+                      </button>
+                    </td>
+                    <td className={`py-6 text-right font-black ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                      {t.type === 'income' ? '+' : '-'} R$ {t.val.toLocaleString()}
+                    </td>
+                    <td className="py-6 text-right">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onClick={() => onEdit(t)} className="w-8 h-8 rounded-lg bg-white/5 hover:bg-gold hover:text-black flex items-center justify-center transition-all"><ion-icon name="create-outline"></ion-icon></button>
+                        <button onClick={() => onDelete(t.id)} className="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"><ion-icon name="trash-outline"></ion-icon></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+
+    const Subscriptions = ({ items, onAdd, onEdit }) => (
+      <div className="glass-card p-10">
+        <div className="flex justify-between items-center mb-10">
+          <div>
+            <h2 className="text-2xl font-black italic">Gestão de <span className="text-gold">Assinaturas</span></h2>
+            <p className="text-[9px] uppercase font-black tracking-widest text-white/20 mt-1">Custos Fixos e Recorrências</p>
+          </div>
+          <button onClick={onAdd} className="btn-gold">Nova Assinatura</button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {items.map(s => (
+            <div key={s.id} className="glass-card p-6 flex justify-between items-center group">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gold text-xl"><ion-icon name="infinite-outline"></ion-icon></div>
                 <div>
-                  <label className="input-label">Valor</label>
-                  <input type="number" className="modern-input" placeholder="0.00" value={f.val} onChange={e => setF({...f, val: e.target.value})} />
+                  <h4 className="font-bold italic">{s.name}</h4>
+                  <p className="text-[10px] uppercase font-black text-white/30">{s.cycle} • Próx: 05 Abr</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-black text-lg">R$ {s.val}</p>
+                <button onClick={() => onEdit(s)} className="text-[9px] uppercase font-black text-gold/40 hover:text-gold tracking-widest transition-all">Editar</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    const Debts = ({ items, onAdd, onEdit }) => (
+      <div className="glass-card p-10">
+        <div className="flex justify-between items-center mb-10">
+          <div>
+            <h2 className="text-2xl font-black italic">Controle de <span className="text-red-500/80">Passivos</span></h2>
+            <p className="text-[9px] uppercase font-black tracking-widest text-white/20 mt-1">Dívidas e Compromissos a Longo Prazo</p>
+          </div>
+          <button onClick={onAdd} className="btn-gold">Nova Dívida</button>
+        </div>
+        <div className="space-y-6">
+          {items.map(d => (
+            <div key={d.id} className="glass-card p-8">
+              <div className="flex justify-between mb-6">
+                <div>
+                  <h4 className="font-bold text-lg italic">{d.name}</h4>
+                  <p className="text-[10px] uppercase font-black text-white/20">Vencimento: {d.deadline}</p>
+                </div>
+                <button onClick={() => onEdit(d)} className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:text-gold transition-all"><ion-icon name="create-outline"></ion-icon></button>
+              </div>
+              <div className="w-full h-2 bg-white/5 rounded-full mb-3 overflow-hidden">
+                <div className="h-full bg-gold" style={{width: `${(d.paid/d.total)*100}%`}}></div>
+              </div>
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                <span className="text-white/40">Pago: R$ {d.paid.toLocaleString()}</span>
+                <span className="text-gold">Total: R$ {d.total.toLocaleString()}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    const TransactionModal = ({ item, onClose, onSave }) => {
+      const [form, setForm] = useState(item || { desc: '', val: '', type: 'expense', cat: 'Geral', status: 'paid', date: new Date().toISOString().split('T')[0] });
+
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="glass-card p-12 w-full max-w-xl animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-10">
+              <div>
+                <h3 className="text-2xl font-black italic">{item ? 'Editar' : 'Novo'} <span className="text-gold">Lançamento</span></h3>
+                <p className="text-[10px] font-black uppercase tracking-[.3em] text-white/20 mt-1">Asset Intelligence Input</p>
+              </div>
+              <button onClick={onClose} className="text-2xl text-white/20 hover:text-white"><ion-icon name="close-outline"></ion-icon></button>
+            </div>
+
+            <div className="space-y-8">
+              <div className="grid grid-cols-2 p-1 bg-black rounded-xl border border-white/5">
+                <button 
+                  onClick={() => setForm({...form, type: 'income'})}
+                  className={`py-3 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${form.type === 'income' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'text-white/20'}`}
+                >Entrada</button>
+                <button 
+                  onClick={() => setForm({...form, type: 'expense'})}
+                  className={`py-3 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${form.type === 'expense' ? 'bg-zinc-800 text-white' : 'text-white/20'}`}
+                >Saída</button>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3 block">Descrição da Operação</label>
+                <input 
+                  className="input-field" 
+                  value={form.desc} 
+                  onChange={e => setForm({...form, desc: e.target.value})} 
+                  placeholder="Ex: Consultoria Financeira" 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3 block">Montante (R$)</label>
+                  <input 
+                    type="number" 
+                    className="input-field" 
+                    value={form.val} 
+                    onChange={e => setForm({...form, val: e.target.value})} 
+                    placeholder="0.00" 
+                  />
                 </div>
                 <div>
-                  <label className="input-label">Tipo</label>
-                  <select className="modern-input" value={f.type} onChange={e => setF({...f, type: e.target.value})}>
-                    <option value="expense">Saída</option>
-                    <option value="income">Entrada</option>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3 block">Categoria</label>
+                  <select 
+                    className="input-field appearance-none" 
+                    value={form.cat} 
+                    onChange={e => setForm({...form, cat: e.target.value})}
+                  >
+                    <option>Geral</option>
+                    <option>Carreira</option>
+                    <option>Moradia</option>
+                    <option>Alimentação</option>
+                    <option>Lazer</option>
+                    <option>Saúde</option>
                   </select>
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3 block">Data do Evento</label>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    value={form.date} 
+                    onChange={e => setForm({...form, date: e.target.value})} 
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3 block">Estado Liquidação</label>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setForm({...form, status: 'paid'})}
+                      className={`flex-1 py-3 rounded-xl border transition-all text-[10px] font-black uppercase ${form.status === 'paid' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500' : 'bg-transparent border-white/5 text-white/20'}`}
+                    >Efetivado</button>
+                    <button 
+                      onClick={() => setForm({...form, status: 'pending'})}
+                      className={`flex-1 py-3 rounded-xl border transition-all text-[10px] font-black uppercase ${form.status === 'pending' ? 'bg-amber-500/10 border-amber-500/50 text-amber-500' : 'bg-transparent border-white/5 text-white/20'}`}
+                    >Pendente</button>
+                  </div>
+                </div>
+              </div>
+
               <button 
-                className="btn-gold-action !mt-8" 
-                onClick={() => {
-                  if(!f.desc || !f.val) return;
-                  onSave({ ...f, val: parseFloat(f.val), id: Date.now(), date: '18/03/24' });
-                }}
+                onClick={() => onSave({...form, val: parseFloat(form.val)})} 
+                className="btn-gold w-full mt-4 !text-sm"
               >
-                Confirmar Registro
+                Salvar Registo Financeiro
               </button>
             </div>
           </div>
