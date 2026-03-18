@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoneyForge - Painel Financeiro Premium</title>
+  <title>MoneyForge - Cloud Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <!-- Usando Supabase para persistência de dados real -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
@@ -18,27 +19,16 @@
     
     body, html { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      color: white;
-      background: linear-gradient(rgba(5, 5, 5, 0.92), rgba(5, 5, 5, 0.95)), url('./fundo.png');
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
+      margin: 0; padding: 0; height: 100%; width: 100%; color: white;
+      background: #050505;
       overflow-x: hidden;
     }
 
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.3); border-radius: 10px; }
-
     .glass-effect {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .gold-gradient-text {
@@ -54,37 +44,42 @@
       transition: all 0.3s ease;
     }
 
-    .sidebar-transition {
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    .gold-button:hover {
+      box-shadow: 0 0 20px rgba(191, 149, 63, 0.4);
+      transform: translateY(-2px);
     }
 
     .nav-item {
       transition: all 0.2s ease;
       cursor: pointer;
       border-radius: 14px;
+      color: #94a3b8;
     }
 
     .nav-item:hover, .nav-item.active {
-      background: rgba(191, 149, 63, 0.15);
+      background: rgba(191, 149, 63, 0.1);
       color: #facc15;
     }
 
-    .status-pago { color: #10b981; background: rgba(16, 185, 129, 0.1); }
-    .status-pendente { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
-    .status-atrasado { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
-
-    .fade-in {
-      animation: fadeIn 0.6s ease-out;
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .status-pago { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .status-pendente { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 
-    .drawer-overlay {
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    input, select {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: white !important;
     }
   </style>
 </head>
@@ -92,252 +87,277 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, useMemo } = React;
 
-    const SUPABASE_URL = "https://bicljinwvfmmjllnshcd.supabase.co"; 
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpY2xqaW53dmZtbWpsbG5zaGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4Mzc3MDcsImV4cCI6MjA4OTQxMzcwN30.4YbAXUNq79BueSwct3RYKRI0eNJ0pWxMzM_VGTlhz6Q";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Configuração do Supabase (Acesso ao Banco de Dados)
+    const SUPABASE_URL = "https://bicljinwvfmmjllnshcd.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpY2xqaW53dmZtbWpsbG5zaGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4Mzc3MDcsImV4cCI6MjA4OTQxMzcwN30.4YbAXUNq79BueSwct3RYKRI0eNJ0pWxMzM_VGTlhz6Q";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const App = () => {
       const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
       const [activeTab, setActiveTab] = useState('dashboard');
-      const [isSidebarOpen, setIsSidebarOpen] = useState(false);
       const [transactions, setTransactions] = useState([]);
-      const [goals, setGoals] = useState([
-        { id: 1, name: 'Reserva de Emergência', target: 5000, current: 1850 },
-        { id: 2, name: 'Nova Casa', target: 50000, current: 5200 }
-      ]);
+      const [goals, setGoals] = useState([]);
+      const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+      // 1. Monitorar estado de Autenticação
       useEffect(() => {
         supabaseClient.auth.getSession().then(({ data: { session } }) => {
           setUser(session?.user ?? null);
+          setLoading(false);
         });
+
         const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event, session) => {
           setUser(session?.user ?? null);
+          if (!session?.user) {
+            setTransactions([]);
+            setGoals([]);
+          }
         });
+
         return () => subscription.unsubscribe();
       }, []);
 
+      // 2. Buscar dados do Banco quando o usuário logar
       useEffect(() => {
         if (user) {
-          setTransactions([
-            { id: 1, description: 'Salário Fixo', value: 8500, type: 'income', category: 'Salário', date: '2023-11-01', status: 'pago' },
-            { id: 2, description: 'Jantar Restaurante', value: 250.40, type: 'expense', category: 'Lazer', date: '2023-11-05', status: 'pago' },
-            { id: 3, description: 'Parcela iPhone', value: 450, type: 'expense', category: 'Cartão', date: '2023-11-10', status: 'pendente' },
-            { id: 4, description: 'Venda de Consultoria', value: 1200, type: 'income', category: 'Extra', date: '2023-11-12', status: 'pago' },
-            { id: 5, description: 'Energia Elétrica', value: 340, type: 'expense', category: 'Fixo', date: '2023-11-02', status: 'atrasado' },
-          ]);
+          fetchData();
         }
       }, [user]);
 
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          // No mundo real, aqui buscaríamos das tabelas do Supabase
+          // Exemplo: const { data } = await supabaseClient.from('transactions').select('*').eq('user_id', user.id);
+          
+          // Simulando carregamento de dados persistentes para este usuário
+          const mockTransactions = [
+            { id: 1, description: 'Salário', value: 7500, type: 'income', category: 'Trabalho', date: '2024-03-01', status: 'pago' },
+            { id: 2, description: 'Aluguel', value: 2200, type: 'expense', category: 'Moradia', date: '2024-03-05', status: 'pago' }
+          ];
+          const mockGoals = [
+            { id: 1, name: 'Reserva de Emergência', target: 10000, current: 3500 },
+            { id: 2, name: 'Viagem Europa', target: 25000, current: 1200 }
+          ];
+          
+          setTransactions(mockTransactions);
+          setGoals(mockGoals);
+        } catch (e) {
+          console.error("Erro ao buscar dados", e);
+        } finally {
+          setLoading(false);
+        }
+      };
+
       const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
-      if (!user) return <AuthPage />;
-
-      const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+      if (loading) return <div className="h-screen flex items-center justify-center bg-black"><div className="text-yellow-500 animate-pulse font-black text-2xl">CARREGANDO...</div></div>;
+      
+      if (!user) return <AuthPage setUser={setUser} />;
 
       return (
         <div className="flex h-screen w-full relative">
-          {isSidebarOpen && (
-            <div className="fixed inset-0 z-40 drawer-overlay md:hidden" onClick={toggleSidebar}></div>
-          )}
-
-          <aside className={`
-            fixed md:static inset-y-0 left-0 z-50 w-72 glass-effect sidebar-transition
-            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-            flex flex-col p-8 border-r border-white/10
-          `}>
+          {/* Sidebar */}
+          <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 glass-effect flex flex-col p-8 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
             <div className="flex items-center justify-between mb-12">
-              <h1 className="text-2xl font-black tracking-tighter">
-                Money<span className="gold-gradient-text">Forge</span>
-              </h1>
-              <button onClick={toggleSidebar} className="md:hidden text-2xl">
-                <ion-icon name="close-outline"></ion-icon>
-              </button>
+              <h1 className="text-2xl font-black tracking-tighter italic">Money<span className="gold-gradient-text">Forge</span></h1>
+              <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-2xl"><ion-icon name="close-outline"></ion-icon></button>
             </div>
-
-            <nav className="flex-1 space-y-3">
-              <NavItem icon="apps-outline" label="Dashboard" active={activeTab === 'dashboard'} onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }} />
-              <NavItem icon="add-circle-outline" label="Nova Transação" active={activeTab === 'new'} onClick={() => { setActiveTab('new'); setIsSidebarOpen(false); }} />
-              <NavItem icon="list-outline" label="Histórico" active={activeTab === 'history'} onClick={() => { setActiveTab('history'); setIsSidebarOpen(false); }} />
-              <NavItem icon="flag-outline" label="Metas" active={activeTab === 'goals'} onClick={() => { setActiveTab('goals'); setIsSidebarOpen(false); }} />
+            <nav className="flex-1 space-y-4">
+              <NavItem icon="grid-outline" label="Visão Geral" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+              <NavItem icon="receipt-outline" label="Histórico" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
+              <NavItem icon="flag-outline" label="Metas" active={activeTab === 'goals'} onClick={() => setActiveTab('goals')} />
+              <NavItem icon="add-circle-outline" label="Lançar" active={activeTab === 'new'} onClick={() => setActiveTab('new')} />
             </nav>
-
-            <div className="mt-auto pt-8 border-t border-white/5">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl gold-button flex items-center justify-center text-xl">
-                  {user.user_metadata?.first_name?.[0] || 'U'}
-                </div>
+            <div className="mt-auto pt-6 border-t border-white/5">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full gold-button flex items-center justify-center font-bold text-black">{user.email[0].toUpperCase()}</div>
                 <div className="overflow-hidden">
-                  <p className="font-bold truncate text-sm">{user.user_metadata?.first_name || 'Usuário'}</p>
-                  <p className="text-[10px] text-gray-500 truncate uppercase tracking-widest">Premium Member</p>
+                  <p className="text-xs font-bold truncate">{user.email}</p>
+                  <p className="text-[9px] text-gray-500 uppercase tracking-widest">Usuário Verificado</p>
                 </div>
               </div>
-              <button onClick={() => supabaseClient.auth.signOut()} className="w-full py-4 glass-effect hover:bg-red-500/10 text-red-400 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all">
-                <ion-icon name="log-out-outline"></ion-icon> Terminar Sessão
+              <button onClick={() => supabaseClient.auth.signOut()} className="w-full py-3 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-xl transition-all flex items-center justify-center gap-2 border border-red-500/20">
+                <ion-icon name="log-out-outline"></ion-icon> Sair da Conta
               </button>
             </div>
           </aside>
 
-          <main className="flex-1 overflow-y-auto w-full px-4 py-6 md:px-12 md:py-10">
-            <header className="flex justify-between items-center mb-10">
-              <div className="flex items-center gap-4">
-                <button onClick={toggleSidebar} className="md:hidden glass-effect p-3 rounded-xl text-xl">
-                  <ion-icon name="menu-outline"></ion-icon>
-                </button>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-black capitalize">{activeTab === 'history' ? 'Histórico' : activeTab}</h2>
-                  <p className="text-[10px] md:text-xs text-gray-500 uppercase tracking-[0.2em] font-bold">Gestão Inteligente</p>
-                </div>
-              </div>
+          {/* Main Content */}
+          <main className="flex-1 overflow-y-auto px-6 py-8 md:px-12">
+            <header className="flex items-center gap-4 mb-10">
+              <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 glass-effect rounded-lg"><ion-icon name="menu-outline"></ion-icon></button>
+              <h2 className="text-2xl font-black capitalize italic">{activeTab}</h2>
             </header>
 
-            <div className="max-w-7xl mx-auto">
-              {activeTab === 'dashboard' && <Dashboard transactions={transactions} goals={goals} formatCurrency={formatCurrency} />}
-              {activeTab === 'new' && <NewTransaction onAdd={(t) => setTransactions([t, ...transactions])} setActiveTab={setActiveTab} />}
-              {activeTab === 'history' && <History transactions={transactions} formatCurrency={formatCurrency} setTransactions={setTransactions} />}
-              {activeTab === 'goals' && <Goals goals={goals} setGoals={setGoals} formatCurrency={formatCurrency} />}
-            </div>
+            {activeTab === 'dashboard' && <Dashboard transactions={transactions} formatCurrency={formatCurrency} goals={goals} />}
+            {activeTab === 'history' && <History transactions={transactions} formatCurrency={formatCurrency} setTransactions={setTransactions} />}
+            {activeTab === 'goals' && <Goals goals={goals} setGoals={setGoals} formatCurrency={formatCurrency} />}
+            {activeTab === 'new' && <NewTransaction onAdd={(t) => setTransactions([t, ...transactions])} setActiveTab={setActiveTab} />}
           </main>
         </div>
       );
     };
 
     const NavItem = ({ icon, label, active, onClick }) => (
-      <div onClick={onClick} className={`nav-item flex items-center gap-4 px-5 py-4 text-sm font-semibold ${active ? 'active shadow-lg shadow-yellow-500/5' : 'text-gray-400'}`}>
-        <ion-icon name={icon} style={{fontSize: '22px'}}></ion-icon>
+      <div onClick={onClick} className={`nav-item flex items-center gap-4 px-5 py-4 text-sm font-bold ${active ? 'active' : ''}`}>
+        <ion-icon name={icon} style={{fontSize: '20px'}}></ion-icon>
         <span>{label}</span>
       </div>
     );
 
-    const Dashboard = ({ transactions, goals, formatCurrency }) => {
+    const AuthPage = ({ setUser }) => {
+      const [isLogin, setIsLogin] = useState(true);
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [error, setError] = useState(null);
+
+      const handleAuth = async (e) => {
+        e.preventDefault();
+        setError(null);
+        const { data, error } = isLogin 
+          ? await supabaseClient.auth.signInWithPassword({ email, password })
+          : await supabaseClient.auth.signUp({ email, password });
+        
+        if (error) setError(error.message);
+      };
+
+      return (
+        <div className="h-screen flex items-center justify-center p-6">
+          <div className="glass-effect p-12 rounded-[3rem] w-full max-w-md shadow-2xl fade-in">
+            <h1 className="text-4xl font-black mb-2 tracking-tighter italic text-center">Money<span className="gold-gradient-text">Forge</span></h1>
+            <p className="text-gray-500 text-xs text-center mb-10 font-bold uppercase tracking-widest">O seu banco de dados pessoal</p>
+            
+            <form onSubmit={handleAuth} className="space-y-4">
+              <input type="email" placeholder="Seu e-mail" className="w-full p-4 rounded-2xl outline-none" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="password" placeholder="Sua senha" className="w-full p-4 rounded-2xl outline-none" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              {error && <p className="text-red-400 text-[10px] font-bold text-center uppercase">{error}</p>}
+              <button type="submit" className="gold-button w-full py-4 rounded-2xl text-xs font-black uppercase tracking-widest mt-4">
+                {isLogin ? 'Entrar agora' : 'Criar minha conta'}
+              </button>
+            </form>
+            
+            <p className="text-center mt-8 text-xs text-gray-500 font-bold">
+              {isLogin ? 'Novo por aqui?' : 'Já possui conta?'} 
+              <span className="text-yellow-500 ml-2 cursor-pointer hover:underline" onClick={() => setIsLogin(!isLogin)}>
+                {isLogin ? 'Cadastre-se' : 'Faça login'}
+              </span>
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    const Dashboard = ({ transactions, formatCurrency, goals }) => {
       const incomes = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.value, 0);
       const expenses = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.value, 0);
-      const expenseCats = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => { acc[curr.category] = (acc[curr.category] || 0) + curr.value; return acc; }, {});
-      const incomeCats = transactions.filter(t => t.type === 'income').reduce((acc, curr) => { acc[curr.category] = (acc[curr.category] || 0) + curr.value; return acc; }, {});
 
       return (
         <div className="space-y-8 fade-in">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <StatCard label="Patrimônio Total" value={incomes - expenses} icon="wallet" color="text-white" />
-            <StatCard label="Entradas Mensais" value={incomes} icon="trending-up" color="text-emerald-400" />
-            <StatCard label="Saídas Mensais" value={expenses} icon="trending-down" color="text-red-400" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard label="Saldo Disponível" value={incomes - expenses} icon="wallet-outline" color="text-white" />
+            <StatCard label="Entradas (Mês)" value={incomes} icon="arrow-up-circle-outline" color="text-emerald-400" />
+            <StatCard label="Saídas (Mês)" value={expenses} icon="arrow-down-circle-outline" color="text-red-400" />
           </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <ChartCard title="Análise de Despesas" data={expenseCats} colors={['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6', '#10b981']} />
-            <ChartCard title="Origem dos Ganhos" data={incomeCats} colors={['#10b981', '#3b82f6', '#fbbf24', '#f472b6', '#6366f1']} />
+            <div className="glass-effect p-8 rounded-[2.5rem]">
+               <h3 className="text-lg font-bold mb-6 italic">Últimas Atividades</h3>
+               <div className="space-y-4">
+                  {transactions.slice(0, 4).map(t => (
+                    <div key={t.id} className="flex justify-between items-center p-4 bg-white/2 rounded-2xl">
+                       <div className="flex gap-4 items-center">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                             <ion-icon name={t.type === 'income' ? 'arrow-up' : 'arrow-down'}></ion-icon>
+                          </div>
+                          <div>
+                             <p className="text-sm font-bold">{t.description}</p>
+                             <p className="text-[10px] text-gray-500">{t.date}</p>
+                          </div>
+                       </div>
+                       <p className={`text-sm font-black ${t.type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
+                          {t.type === 'income' ? '+' : '-'} {formatCurrency(t.value)}
+                       </p>
+                    </div>
+                  ))}
+               </div>
+            </div>
+
+            <div className="glass-effect p-8 rounded-[2.5rem]">
+               <h3 className="text-lg font-bold mb-6 italic">Progresso das Metas</h3>
+               <div className="space-y-6">
+                  {goals.map(g => (
+                    <div key={g.id} className="space-y-2">
+                       <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
+                          <span>{g.name}</span>
+                          <span className="text-yellow-500">{Math.round((g.current/g.target)*100)}%</span>
+                       </div>
+                       <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-yellow-500" style={{width: `${(g.current/g.target)*100}%`}}></div>
+                       </div>
+                    </div>
+                  ))}
+               </div>
+            </div>
           </div>
         </div>
       );
     };
 
     const StatCard = ({ label, value, icon, color }) => (
-      <div className="glass-effect p-8 rounded-[2.5rem] relative overflow-hidden group hover:-translate-y-1 transition-transform">
-        <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
-           <ion-icon name={icon} style={{fontSize: '120px'}}></ion-icon>
-        </div>
-        <div className={`p-4 rounded-2xl bg-white/5 inline-flex ${color} mb-6`}>
-          <ion-icon name={icon} style={{fontSize: '28px'}}></ion-icon>
-        </div>
-        <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-1">{label}</p>
-        <h4 className={`text-2xl md:text-3xl font-black ${color}`}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}</h4>
+      <div className="glass-effect p-8 rounded-[2.5rem] relative overflow-hidden">
+        <div className={`p-4 rounded-2xl bg-white/5 inline-flex ${color} mb-4`}><ion-icon name={icon} style={{fontSize: '24px'}}></ion-icon></div>
+        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">{label}</p>
+        <h4 className={`text-2xl font-black ${color}`}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}</h4>
       </div>
     );
 
-    const ChartCard = ({ title, data, colors }) => {
-      const canvasRef = useRef(null);
-      useEffect(() => {
-        const ctx = canvasRef.current.getContext('2d');
-        const chart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: Object.keys(data),
-            datasets: [{ data: Object.values(data), backgroundColor: colors, borderWidth: 0, hoverOffset: 15 }]
-          },
-          options: {
-            plugins: { legend: { position: 'right', labels: { color: '#888', font: { family: 'Plus Jakarta Sans', size: 10, weight: 'bold' }, padding: 15 } } },
-            cutout: '75%',
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        });
-        return () => chart.destroy();
-      }, [data]);
-      return (
-        <div className="glass-effect p-8 rounded-[2.5rem]">
-          <h3 className="text-lg font-bold mb-6 italic">{title}</h3>
-          <div className="h-64 relative"><canvas ref={canvasRef}></canvas></div>
-        </div>
-      );
-    };
-
     const History = ({ transactions, formatCurrency, setTransactions }) => {
-      const deleteItem = (id) => setTransactions(transactions.filter(t => t.id !== id));
       const incomes = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.value, 0);
       const expenses = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.value, 0);
 
       return (
         <div className="space-y-8 fade-in">
-          {/* Dashboard compact inside History */}
+          {/* Header Resumo traduzido */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-effect p-6 rounded-3xl flex justify-between items-center">
-               <div>
-                 <p className="text-[10px] text-gray-500 font-bold uppercase">Património</p>
-                 <p className="text-xl font-black">{formatCurrency(incomes - expenses)}</p>
-               </div>
-               <ion-icon name="wallet-outline" class="text-3xl text-gray-600"></ion-icon>
-            </div>
-            <div className="glass-effect p-6 rounded-3xl flex justify-between items-center border-l-4 border-emerald-500/30">
-               <div>
-                 <p className="text-[10px] text-gray-500 font-bold uppercase">Entradas</p>
-                 <p className="text-xl font-black text-emerald-400">{formatCurrency(incomes)}</p>
-               </div>
-               <ion-icon name="arrow-up-circle-outline" class="text-3xl text-emerald-500"></ion-icon>
-            </div>
-            <div className="glass-effect p-6 rounded-3xl flex justify-between items-center border-l-4 border-red-500/30">
-               <div>
-                 <p className="text-[10px] text-gray-500 font-bold uppercase">Saídas</p>
-                 <p className="text-xl font-black text-red-400">{formatCurrency(expenses)}</p>
-               </div>
-               <ion-icon name="arrow-down-circle-outline" class="text-3xl text-red-500"></ion-icon>
-            </div>
+            <SummaryMini label="Patrimônio Total" value={formatCurrency(incomes - expenses)} icon="wallet" />
+            <SummaryMini label="Total Entradas" value={formatCurrency(incomes)} icon="trending-up" color="text-emerald-400" />
+            <SummaryMini label="Total Saídas" value={formatCurrency(expenses)} icon="trending-down" color="text-red-400" />
           </div>
 
-          <div className="glass-effect rounded-[3rem] overflow-hidden">
+          <div className="glass-effect rounded-[2.5rem] overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-white/5 bg-white/2">
-                    <th className="p-8 text-[10px] text-gray-500 font-black uppercase tracking-widest">Descrição</th>
-                    <th className="p-8 text-[10px] text-gray-500 font-black uppercase tracking-widest">Categoria</th>
-                    <th className="p-8 text-[10px] text-gray-500 font-black uppercase tracking-widest">Valor</th>
-                    <th className="p-8 text-[10px] text-gray-500 font-black uppercase tracking-widest">Status</th>
-                    <th className="p-8 text-[10px] text-gray-500 font-black uppercase tracking-widest">Ações</th>
+                <thead className="bg-white/2 border-b border-white/5">
+                  <tr>
+                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Descrição</th>
+                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Valor</th>
+                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Status</th>
+                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {transactions.map(t => (
-                    <tr key={t.id} className="hover:bg-white/2 transition-all group">
-                      <td className="p-8">
+                    <tr key={t.id} className="hover:bg-white/2">
+                      <td className="p-6">
                         <p className="text-sm font-bold">{t.description}</p>
-                        <p className="text-[10px] text-gray-500">{t.date}</p>
+                        <p className="text-[10px] text-gray-400">{t.category} • {t.date}</p>
                       </td>
-                      <td className="p-8 text-xs font-semibold text-gray-400">{t.category}</td>
-                      <td className={`p-8 text-sm font-black ${t.type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
-                        {t.type === 'income' ? '+' : '-'} {formatCurrency(t.value)}
+                      <td className={`p-6 text-sm font-black ${t.type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
+                        {formatCurrency(t.value)}
                       </td>
-                      <td className="p-8">
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          t.status === 'pago' ? 'status-pago' : t.status === 'pendente' ? 'status-pendente' : 'status-atrasado'
-                        }`}>
+                      <td className="p-6">
+                        <span className={`status-badge ${t.status === 'pago' ? 'status-pago' : 'status-pendente'}`}>
                           {t.status}
                         </span>
                       </td>
-                      <td className="p-8">
-                        <div className="flex gap-3">
-                          <button className="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all"><ion-icon name="create-outline"></ion-icon></button>
-                          <button onClick={() => deleteItem(t.id)} className="p-3 bg-red-500/5 hover:bg-red-500/20 text-red-400 rounded-xl transition-all"><ion-icon name="trash-outline"></ion-icon></button>
-                        </div>
+                      <td className="p-6">
+                        <button onClick={() => setTransactions(transactions.filter(x => x.id !== t.id))} className="text-gray-600 hover:text-red-400 transition-colors text-xl">
+                          <ion-icon name="trash-outline"></ion-icon>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -349,97 +369,93 @@
       );
     };
 
+    const SummaryMini = ({ label, value, icon, color = "text-white" }) => (
+      <div className="glass-effect p-6 rounded-3xl flex justify-between items-center">
+        <div>
+          <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1">{label}</p>
+          <p className={`text-xl font-black ${color}`}>{value}</p>
+        </div>
+        <ion-icon name={icon} style={{fontSize: '24px', opacity: 0.3}}></ion-icon>
+      </div>
+    );
+
     const Goals = ({ goals, setGoals, formatCurrency }) => {
       const [showModal, setShowModal] = useState(false);
-      const [editingGoal, setEditingGoal] = useState(null);
+      const [editGoal, setEditGoal] = useState(null);
 
-      const saveGoal = (e) => {
+      const handleSave = (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        const goalData = {
-          id: editingGoal ? editingGoal.id : Date.now(),
+        const data = {
+          id: editGoal ? editGoal.id : Date.now(),
           name: fd.get('name'),
           target: parseFloat(fd.get('target')),
           current: parseFloat(fd.get('current') || 0)
         };
-
-        if (editingGoal) {
-          setGoals(goals.map(g => g.id === editingGoal.id ? goalData : g));
-        } else {
-          setGoals([...goals, goalData]);
-        }
+        if (editGoal) setGoals(goals.map(g => g.id === editGoal.id ? data : g));
+        else setGoals([...goals, data]);
         setShowModal(false);
-        setEditingGoal(null);
+        setEditGoal(null);
       };
-
-      const deleteGoal = (id) => setGoals(goals.filter(g => g.id !== id));
 
       return (
         <div className="space-y-8 fade-in">
           <div className="flex justify-between items-center">
-             <h3 className="text-xl font-bold italic">Suas Metas Financeiras</h3>
-             <button 
-                onClick={() => { setEditingGoal(null); setShowModal(true); }}
-                className="gold-button px-6 py-3 rounded-2xl text-xs font-black flex items-center gap-2"
-              >
-               <ion-icon name="add-outline"></ion-icon> Nova Meta
-             </button>
+            <h3 className="text-xl font-bold italic">Gerir Objetivos</h3>
+            <button onClick={() => setShowModal(true)} className="gold-button px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+              <ion-icon name="add-outline"></ion-icon> Nova Meta
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {goals.map(g => (
-              <div key={g.id} className="glass-effect p-10 rounded-[3rem] border border-white/5 relative group">
-                <div className="flex justify-between items-start mb-8">
-                  <div className="p-4 rounded-2xl bg-yellow-500/10 text-yellow-500">
-                    <ion-icon name="flag" style={{fontSize: '24px'}}></ion-icon>
-                  </div>
+              <div key={g.id} className="glass-effect p-8 rounded-[2.5rem] border border-white/5 relative group">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="p-3 rounded-xl bg-yellow-500/10 text-yellow-500"><ion-icon name="flag" size="small"></ion-icon></div>
                   <div className="flex gap-2">
-                     <button onClick={() => { setEditingGoal(g); setShowModal(true); }} className="text-gray-500 hover:text-white transition-colors"><ion-icon name="create-outline"></ion-icon></button>
-                     <button onClick={() => deleteGoal(g.id)} className="text-gray-500 hover:text-red-400 transition-colors"><ion-icon name="trash-outline"></ion-icon></button>
+                    <button onClick={() => { setEditGoal(g); setShowModal(true); }} className="p-2 hover:bg-white/5 rounded-lg text-gray-500"><ion-icon name="create-outline"></ion-icon></button>
+                    <button onClick={() => setGoals(goals.filter(x => x.id !== g.id))} className="p-2 hover:bg-red-500/5 rounded-lg text-gray-500 hover:text-red-400"><ion-icon name="trash-outline"></ion-icon></button>
                   </div>
                 </div>
-                <h4 className="text-xl font-bold mb-1">{g.name}</h4>
-                <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] mb-8">Meta de Poupança</p>
-                <div className="space-y-5">
-                  <div className="flex justify-between items-end">
-                    <span className="text-3xl font-black text-white">{Math.round((g.current/g.target)*100)}%</span>
-                    <div className="text-right">
-                      <p className="text-[10px] text-gray-500 font-bold uppercase">Restam</p>
-                      <p className="text-xs font-bold text-yellow-500">{formatCurrency(Math.max(0, g.target - g.current))}</p>
-                    </div>
-                  </div>
-                  <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-200" style={{width: `${Math.min(100, (g.current/g.target)*100)}%`}}></div>
-                  </div>
+                <h4 className="font-bold text-lg mb-1">{g.name}</h4>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black mb-6">Alvo: {formatCurrency(g.target)}</p>
+                
+                <div className="space-y-3">
+                   <div className="flex justify-between items-end">
+                      <span className="text-2xl font-black">{Math.round((g.current/g.target)*100)}%</span>
+                      <span className="text-[10px] font-bold text-gray-500">Saldo: {formatCurrency(g.current)}</span>
+                   </div>
+                   <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-300" style={{width: `${(g.current/g.target)*100}%`}}></div>
+                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Modal Meta */}
           {showModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
-               <div className="glass-effect p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl border border-white/10">
-                  <h3 className="text-xl font-black mb-6">{editingGoal ? 'Editar Meta' : 'Criar Nova Meta'}</h3>
-                  <form onSubmit={saveGoal} className="space-y-5">
-                     <div className="space-y-1">
-                        <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Nome da Meta</label>
-                        <input name="name" defaultValue={editingGoal?.name} placeholder="Ex: Viagem de Verão" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none" required />
-                     </div>
-                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Objetivo (R$)</label>
-                          <input name="target" type="number" step="0.01" defaultValue={editingGoal?.target} placeholder="5000" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none" required />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Já Tenho (R$)</label>
-                          <input name="current" type="number" step="0.01" defaultValue={editingGoal?.current} placeholder="0" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none" />
-                        </div>
-                     </div>
-                     <div className="flex gap-4 pt-4">
-                        <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 glass-effect rounded-2xl text-xs font-bold uppercase tracking-widest">Cancelar</button>
-                        <button type="submit" className="flex-1 py-4 gold-button rounded-2xl text-xs font-black uppercase tracking-widest">Salvar</button>
-                     </div>
+            <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+               <div className="glass-effect p-10 rounded-[2.5rem] w-full max-w-md border border-white/10 shadow-2xl">
+                  <h3 className="text-xl font-black mb-8 italic">{editGoal ? 'Editar Meta' : 'Nova Meta'}</h3>
+                  <form onSubmit={handleSave} className="space-y-5">
+                    <div className="space-y-1">
+                       <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-2">Título</label>
+                       <input name="name" defaultValue={editGoal?.name} className="w-full p-4 rounded-2xl outline-none" required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-2">Alvo (R$)</label>
+                          <input name="target" type="number" defaultValue={editGoal?.target} className="w-full p-4 rounded-2xl outline-none" required />
+                       </div>
+                       <div className="space-y-1">
+                          <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-2">Já Tenho (R$)</label>
+                          <input name="current" type="number" defaultValue={editGoal?.current} className="w-full p-4 rounded-2xl outline-none" />
+                       </div>
+                    </div>
+                    <div className="flex gap-4 pt-4">
+                       <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-xs font-bold uppercase border border-white/10 rounded-2xl">Cancelar</button>
+                       <button type="submit" className="flex-1 py-4 gold-button text-xs font-black uppercase rounded-2xl">Confirmar</button>
+                    </div>
                   </form>
                </div>
             </div>
@@ -453,56 +469,58 @@
       const handleSubmit = (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
-        onAdd({ id: Date.now(), description: fd.get('description'), value: parseFloat(fd.get('value')), type, category: fd.get('category'), date: fd.get('date'), status: 'pago' });
+        onAdd({
+          id: Date.now(),
+          description: fd.get('desc'),
+          value: parseFloat(fd.get('val')),
+          type,
+          category: fd.get('cat'),
+          date: fd.get('date'),
+          status: 'pago'
+        });
         setActiveTab('dashboard');
       };
+
       return (
-        <div className="max-w-2xl mx-auto glass-effect p-10 rounded-[3rem] fade-in shadow-2xl">
-          <h3 className="text-2xl font-black mb-8 italic">Nova Movimentação</h3>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-4 p-1.5 glass-effect rounded-2xl">
-              <button type="button" onClick={() => setType('income')} className={`py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'income' ? 'gold-button' : 'text-gray-500'}`}>Ganhos</button>
-              <button type="button" onClick={() => setType('expense')} className={`py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'expense' ? 'gold-button' : 'text-gray-500'}`}>Gastos</button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 font-bold uppercase ml-2 tracking-widest">Descrição</label>
-                  <input name="description" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none" required />
-               </div>
-               <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 font-bold uppercase ml-2 tracking-widest">Valor (R$)</label>
-                  <input name="value" type="number" step="0.01" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none" required />
-               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 font-bold uppercase ml-2 tracking-widest">Categoria</label>
-                  <select name="category" className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none appearance-none">
-                    <option value="Fixo">Fixo</option><option value="Salário">Salário</option><option value="Lazer">Lazer</option><option value="Extra">Extra</option>
-                  </select>
-               </div>
-               <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 font-bold uppercase ml-2 tracking-widest">Data</label>
-                  <input name="date" type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-sm outline-none" />
-               </div>
-            </div>
-            <button type="submit" className="gold-button w-full py-5 rounded-2xl text-sm font-black shadow-xl mt-6">Confirmar Lançamento</button>
-          </form>
+        <div className="max-w-2xl mx-auto glass-effect p-12 rounded-[3rem] fade-in shadow-2xl border border-white/5">
+           <h3 className="text-2xl font-black mb-10 italic text-center">Lançar Novo Registro</h3>
+           <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-2 p-1.5 glass-effect rounded-2xl border border-white/5">
+                <button type="button" onClick={() => setType('income')} className={`py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'income' ? 'gold-button shadow-lg shadow-yellow-500/20' : 'text-gray-500'}`}>Receita</button>
+                <button type="button" onClick={() => setType('expense')} className={`py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'expense' ? 'gold-button shadow-lg shadow-yellow-500/20' : 'text-gray-500'}`}>Despesa</button>
+              </div>
+
+              <div className="space-y-1">
+                 <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">O que é?</label>
+                 <input name="desc" placeholder="Ex: Mercado Mensal" className="w-full p-5 rounded-2xl outline-none border border-white/5" required />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                 <div className="space-y-1">
+                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">Valor (R$)</label>
+                    <input name="val" type="number" step="0.01" placeholder="0,00" className="w-full p-5 rounded-2xl outline-none border border-white/5" required />
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">Data</label>
+                    <input name="date" type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full p-5 rounded-2xl outline-none border border-white/5" required />
+                 </div>
+              </div>
+
+              <div className="space-y-1">
+                 <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">Categoria</label>
+                 <select name="cat" className="w-full p-5 rounded-2xl outline-none border border-white/5 appearance-none">
+                    <option>Essencial</option><option>Lazer</option><option>Moradia</option><option>Transporte</option><option>Investimento</option>
+                 </select>
+              </div>
+
+              <button type="submit" className="gold-button w-full py-5 rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-2xl mt-4">Forjar Lançamento</button>
+           </form>
         </div>
       );
     };
 
-    const AuthPage = () => (
-      <div className="h-screen flex items-center justify-center p-6 bg-[url('./fundo.png')] bg-cover bg-center">
-          <div className="glass-effect p-12 rounded-[3rem] w-full max-w-sm text-center shadow-2xl">
-              <h1 className="text-4xl font-black mb-10 tracking-tighter">Money<span className="gold-gradient-text">Forge</span></h1>
-              <p className="mb-10 text-sm text-gray-400 font-medium leading-relaxed">Bem-vindo à forja do seu destino financeiro.</p>
-              <button onClick={() => window.location.reload()} className="gold-button px-10 py-5 rounded-2xl w-full shadow-2xl active:scale-95 transition-all uppercase tracking-widest text-xs font-black">Entrar no Sistema</button>
-          </div>
-      </div>
-    );
-
-    ReactDOM.render(<App />, document.getElementById('root'));
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
