@@ -3,518 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoneyForge - Cloud Edition</title>
+  <title>MoneyForge Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-  <!-- Usando Supabase para persistência de dados real -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
     
-    body, html { 
+    body { 
       font-family: 'Plus Jakarta Sans', sans-serif; 
-      margin: 0; padding: 0; height: 100%; width: 100%; color: white;
-      background: #050505;
-      overflow-x: hidden;
+      background: #050505; color: white; margin: 0; overflow: hidden;
     }
 
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .gold-gradient-text {
+    .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    
+    .gold-gradient {
       background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .gold-button {
+    .btn-gold {
       background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
-      color: #000;
-      font-weight: 700;
-      transition: all 0.3s ease;
+      color: #000; font-weight: 800; transition: 0.3s;
     }
+    .btn-gold:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(191, 149, 63, 0.3); }
 
-    .gold-button:hover {
-      box-shadow: 0 0 20px rgba(191, 149, 63, 0.4);
-      transform: translateY(-2px);
-    }
+    .nav-link { color: #64748b; transition: 0.2s; cursor: pointer; border-radius: 12px; }
+    .nav-link.active { background: rgba(191, 149, 63, 0.1); color: #facc15; }
 
-    .nav-item {
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border-radius: 14px;
-      color: #94a3b8;
-    }
+    .scroll-custom::-webkit-scrollbar { width: 4px; }
+    .scroll-custom::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.2); border-radius: 10px; }
 
-    .nav-item:hover, .nav-item.active {
-      background: rgba(191, 149, 63, 0.1);
-      color: #facc15;
-    }
-
-    .status-badge {
-      padding: 4px 12px;
-      border-radius: 99px;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-pago { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-    .status-pendente { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-
-    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    input, select {
-      background: rgba(255, 255, 255, 0.05) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: white !important;
-    }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef, useMemo } = React;
+    const { useState, useEffect } = React;
 
-    // Configuração do Supabase (Acesso ao Banco de Dados)
     const SUPABASE_URL = "https://bicljinwvfmmjllnshcd.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpY2xqaW53dmZtbWpsbG5zaGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4Mzc3MDcsImV4cCI6MjA4OTQxMzcwN30.4YbAXUNq79BueSwct3RYKRI0eNJ0pWxMzM_VGTlhz6Q";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const App = () => {
       const [user, setUser] = useState(null);
-      const [loading, setLoading] = useState(true);
       const [activeTab, setActiveTab] = useState('dashboard');
-      const [transactions, setTransactions] = useState([]);
-      const [goals, setGoals] = useState([]);
-      const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+      const [sidebar, setSidebar] = useState(false);
 
-      // 1. Monitorar estado de Autenticação
       useEffect(() => {
-        supabaseClient.auth.getSession().then(({ data: { session } }) => {
-          setUser(session?.user ?? null);
-          setLoading(false);
-        });
-
-        const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-          setUser(session?.user ?? null);
-          if (!session?.user) {
-            setTransactions([]);
-            setGoals([]);
-          }
-        });
-
-        return () => subscription.unsubscribe();
+        supabaseClient.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
       }, []);
 
-      // 2. Buscar dados do Banco quando o usuário logar
-      useEffect(() => {
-        if (user) {
-          fetchData();
-        }
-      }, [user]);
-
-      const fetchData = async () => {
-        setLoading(true);
-        try {
-          // No mundo real, aqui buscaríamos das tabelas do Supabase
-          // Exemplo: const { data } = await supabaseClient.from('transactions').select('*').eq('user_id', user.id);
-          
-          // Simulando carregamento de dados persistentes para este usuário
-          const mockTransactions = [
-            { id: 1, description: 'Salário', value: 7500, type: 'income', category: 'Trabalho', date: '2024-03-01', status: 'pago' },
-            { id: 2, description: 'Aluguel', value: 2200, type: 'expense', category: 'Moradia', date: '2024-03-05', status: 'pago' }
-          ];
-          const mockGoals = [
-            { id: 1, name: 'Reserva de Emergência', target: 10000, current: 3500 },
-            { id: 2, name: 'Viagem Europa', target: 25000, current: 1200 }
-          ];
-          
-          setTransactions(mockTransactions);
-          setGoals(mockGoals);
-        } catch (e) {
-          console.error("Erro ao buscar dados", e);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-
-      if (loading) return <div className="h-screen flex items-center justify-center bg-black"><div className="text-yellow-500 animate-pulse font-black text-2xl">CARREGANDO...</div></div>;
-      
-      if (!user) return <AuthPage setUser={setUser} />;
+      if (!user) return <AuthPage onLogin={setUser} />;
 
       return (
-        <div className="flex h-screen w-full relative">
+        <div className="flex h-screen w-full">
           {/* Sidebar */}
-          <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 glass-effect flex flex-col p-8 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-            <div className="flex items-center justify-between mb-12">
-              <h1 className="text-2xl font-black tracking-tighter italic">Money<span className="gold-gradient-text">Forge</span></h1>
-              <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-2xl"><ion-icon name="close-outline"></ion-icon></button>
-            </div>
-            <nav className="flex-1 space-y-4">
-              <NavItem icon="grid-outline" label="Visão Geral" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
-              <NavItem icon="receipt-outline" label="Histórico" active={activeTab === 'history'} onClick={() => setActiveTab('history')} />
-              <NavItem icon="flag-outline" label="Metas" active={activeTab === 'goals'} onClick={() => setActiveTab('goals')} />
-              <NavItem icon="add-circle-outline" label="Lançar" active={activeTab === 'new'} onClick={() => setActiveTab('new')} />
+          <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 glass p-6 transition-all ${sidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+            <h1 className="text-xl font-extrabold italic mb-10">Money<span className="gold-gradient">Forge</span></h1>
+            
+            <nav className="space-y-1">
+              <MenuSection title="Principal" />
+              <MenuItem icon="grid-outline" label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+              <MenuItem icon="pie-chart-outline" label="Gráficos" active={activeTab === 'charts'} onClick={() => setActiveTab('charts')} />
+              
+              <MenuSection title="Gestão" />
+              <MenuItem icon="sync-outline" label="Assinaturas" active={activeTab === 'subs'} onClick={() => setActiveTab('subs')} />
+              <MenuItem icon="trending-down-outline" label="Dívidas" active={activeTab === 'debts'} onClick={() => setActiveTab('debts')} />
+              <MenuItem icon="rocket-outline" label="Planeamento" active={activeTab === 'plan'} onClick={() => setActiveTab('plan')} />
+              
+              <MenuSection title="Sistema" />
+              <MenuItem icon="settings-outline" label="Definições" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
             </nav>
-            <div className="mt-auto pt-6 border-t border-white/5">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full gold-button flex items-center justify-center font-bold text-black">{user.email[0].toUpperCase()}</div>
-                <div className="overflow-hidden">
-                  <p className="text-xs font-bold truncate">{user.email}</p>
-                  <p className="text-[9px] text-gray-500 uppercase tracking-widest">Usuário Verificado</p>
-                </div>
-              </div>
-              <button onClick={() => supabaseClient.auth.signOut()} className="w-full py-3 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-xl transition-all flex items-center justify-center gap-2 border border-red-500/20">
-                <ion-icon name="log-out-outline"></ion-icon> Sair da Conta
-              </button>
-            </div>
+
+            <button onClick={() => supabaseClient.auth.signOut()} className="absolute bottom-6 left-6 text-red-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+              <ion-icon name="log-out-outline"></ion-icon> Terminar Sessão
+            </button>
           </aside>
 
-          {/* Main Content */}
-          <main className="flex-1 overflow-y-auto px-6 py-8 md:px-12">
-            <header className="flex items-center gap-4 mb-10">
-              <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 glass-effect rounded-lg"><ion-icon name="menu-outline"></ion-icon></button>
-              <h2 className="text-2xl font-black capitalize italic">{activeTab}</h2>
+          {/* Main */}
+          <main className="flex-1 flex flex-col overflow-hidden bg-[#080808]">
+            <header className="p-6 lg:px-12 flex justify-between items-center">
+              <button onClick={() => setSidebar(true)} className="lg:hidden text-2xl"><ion-icon name="menu-outline"></ion-icon></button>
+              <h2 className="text-lg font-bold italic capitalize">{activeTab}</h2>
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <p className="text-[10px] text-gray-500 font-bold uppercase">{user.email.split('@')[0]}</p>
+                  <p className="text-[9px] text-emerald-500 font-bold">Premium Active</p>
+                </div>
+                <div className="w-10 h-10 rounded-full btn-gold flex items-center justify-center text-sm uppercase">{user.email[0]}</div>
+              </div>
             </header>
 
-            {activeTab === 'dashboard' && <Dashboard transactions={transactions} formatCurrency={formatCurrency} goals={goals} />}
-            {activeTab === 'history' && <History transactions={transactions} formatCurrency={formatCurrency} setTransactions={setTransactions} />}
-            {activeTab === 'goals' && <Goals goals={goals} setGoals={setGoals} formatCurrency={formatCurrency} />}
-            {activeTab === 'new' && <NewTransaction onAdd={(t) => setTransactions([t, ...transactions])} setActiveTab={setActiveTab} />}
+            <section className="flex-1 overflow-y-auto p-6 lg:px-12 scroll-custom">
+              <div className="max-w-5xl mx-auto space-y-6 fade-in">
+                {activeTab === 'dashboard' && <Dashboard />}
+                {activeTab === 'charts' && <ChartsView />}
+                {activeTab === 'subs' && <SubscriptionsView />}
+                {activeTab === 'debts' && <DebtsView />}
+                {activeTab === 'plan' && <PlanningView />}
+                {activeTab === 'settings' && <SettingsView user={user} />}
+              </div>
+            </section>
           </main>
         </div>
       );
     };
 
-    const NavItem = ({ icon, label, active, onClick }) => (
-      <div onClick={onClick} className={`nav-item flex items-center gap-4 px-5 py-4 text-sm font-bold ${active ? 'active' : ''}`}>
-        <ion-icon name={icon} style={{fontSize: '20px'}}></ion-icon>
-        <span>{label}</span>
+    const MenuSection = ({ title }) => <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em] mt-6 mb-2 ml-4">{title}</p>;
+    
+    const MenuItem = ({ icon, label, active, onClick }) => (
+      <div onClick={onClick} className={`nav-link flex items-center gap-3 px-4 py-3 text-xs font-semibold ${active ? 'active' : ''}`}>
+        <ion-icon name={icon} style={{fontSize: '18px'}}></ion-icon>
+        {label}
       </div>
     );
 
-    const AuthPage = ({ setUser }) => {
-      const [isLogin, setIsLogin] = useState(true);
-      const [email, setEmail] = useState('');
-      const [password, setPassword] = useState('');
-      const [error, setError] = useState(null);
+    // --- Componentes das Abas ---
 
-      const handleAuth = async (e) => {
-        e.preventDefault();
-        setError(null);
-        const { data, error } = isLogin 
-          ? await supabaseClient.auth.signInWithPassword({ email, password })
-          : await supabaseClient.auth.signUp({ email, password });
+    const Dashboard = () => (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard title="Saldo Atual" value="€ 4.250,00" color="border-yellow-500" />
+        <StatCard title="Gastos do Mês" value="€ 1.120,50" color="border-red-500" />
+        <StatCard title="Previsão de Poupança" value="€ 850,00" color="border-emerald-500" />
         
-        if (error) setError(error.message);
-      };
-
-      return (
-        <div className="h-screen flex items-center justify-center p-6">
-          <div className="glass-effect p-12 rounded-[3rem] w-full max-w-md shadow-2xl fade-in">
-            <h1 className="text-4xl font-black mb-2 tracking-tighter italic text-center">Money<span className="gold-gradient-text">Forge</span></h1>
-            <p className="text-gray-500 text-xs text-center mb-10 font-bold uppercase tracking-widest">O seu banco de dados pessoal</p>
-            
-            <form onSubmit={handleAuth} className="space-y-4">
-              <input type="email" placeholder="Seu e-mail" className="w-full p-4 rounded-2xl outline-none" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <input type="password" placeholder="Sua senha" className="w-full p-4 rounded-2xl outline-none" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              {error && <p className="text-red-400 text-[10px] font-bold text-center uppercase">{error}</p>}
-              <button type="submit" className="gold-button w-full py-4 rounded-2xl text-xs font-black uppercase tracking-widest mt-4">
-                {isLogin ? 'Entrar agora' : 'Criar minha conta'}
-              </button>
-            </form>
-            
-            <p className="text-center mt-8 text-xs text-gray-500 font-bold">
-              {isLogin ? 'Novo por aqui?' : 'Já possui conta?'} 
-              <span className="text-yellow-500 ml-2 cursor-pointer hover:underline" onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? 'Cadastre-se' : 'Faça login'}
-              </span>
-            </p>
-          </div>
-        </div>
-      );
-    };
-
-    const Dashboard = ({ transactions, formatCurrency, goals }) => {
-      const incomes = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.value, 0);
-      const expenses = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.value, 0);
-
-      return (
-        <div className="space-y-8 fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard label="Saldo Disponível" value={incomes - expenses} icon="wallet-outline" color="text-white" />
-            <StatCard label="Entradas (Mês)" value={incomes} icon="arrow-up-circle-outline" color="text-emerald-400" />
-            <StatCard label="Saídas (Mês)" value={expenses} icon="arrow-down-circle-outline" color="text-red-400" />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="glass-effect p-8 rounded-[2.5rem]">
-               <h3 className="text-lg font-bold mb-6 italic">Últimas Atividades</h3>
-               <div className="space-y-4">
-                  {transactions.slice(0, 4).map(t => (
-                    <div key={t.id} className="flex justify-between items-center p-4 bg-white/2 rounded-2xl">
-                       <div className="flex gap-4 items-center">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
-                             <ion-icon name={t.type === 'income' ? 'arrow-up' : 'arrow-down'}></ion-icon>
-                          </div>
-                          <div>
-                             <p className="text-sm font-bold">{t.description}</p>
-                             <p className="text-[10px] text-gray-500">{t.date}</p>
-                          </div>
-                       </div>
-                       <p className={`text-sm font-black ${t.type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
-                          {t.type === 'income' ? '+' : '-'} {formatCurrency(t.value)}
-                       </p>
-                    </div>
-                  ))}
-               </div>
-            </div>
-
-            <div className="glass-effect p-8 rounded-[2.5rem]">
-               <h3 className="text-lg font-bold mb-6 italic">Progresso das Metas</h3>
-               <div className="space-y-6">
-                  {goals.map(g => (
-                    <div key={g.id} className="space-y-2">
-                       <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                          <span>{g.name}</span>
-                          <span className="text-yellow-500">{Math.round((g.current/g.target)*100)}%</span>
-                       </div>
-                       <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="h-full bg-yellow-500" style={{width: `${(g.current/g.target)*100}%`}}></div>
-                       </div>
-                    </div>
-                  ))}
-               </div>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const StatCard = ({ label, value, icon, color }) => (
-      <div className="glass-effect p-8 rounded-[2.5rem] relative overflow-hidden">
-        <div className={`p-4 rounded-2xl bg-white/5 inline-flex ${color} mb-4`}><ion-icon name={icon} style={{fontSize: '24px'}}></ion-icon></div>
-        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">{label}</p>
-        <h4 className={`text-2xl font-black ${color}`}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}</h4>
-      </div>
-    );
-
-    const History = ({ transactions, formatCurrency, setTransactions }) => {
-      const incomes = transactions.filter(t => t.type === 'income').reduce((a, b) => a + b.value, 0);
-      const expenses = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.value, 0);
-
-      return (
-        <div className="space-y-8 fade-in">
-          {/* Header Resumo traduzido */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <SummaryMini label="Patrimônio Total" value={formatCurrency(incomes - expenses)} icon="wallet" />
-            <SummaryMini label="Total Entradas" value={formatCurrency(incomes)} icon="trending-up" color="text-emerald-400" />
-            <SummaryMini label="Total Saídas" value={formatCurrency(expenses)} icon="trending-down" color="text-red-400" />
-          </div>
-
-          <div className="glass-effect rounded-[2.5rem] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-white/2 border-b border-white/5">
-                  <tr>
-                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Descrição</th>
-                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Valor</th>
-                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Status</th>
-                    <th className="p-6 text-[10px] text-gray-500 font-black uppercase tracking-widest">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {transactions.map(t => (
-                    <tr key={t.id} className="hover:bg-white/2">
-                      <td className="p-6">
-                        <p className="text-sm font-bold">{t.description}</p>
-                        <p className="text-[10px] text-gray-400">{t.category} • {t.date}</p>
-                      </td>
-                      <td className={`p-6 text-sm font-black ${t.type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
-                        {formatCurrency(t.value)}
-                      </td>
-                      <td className="p-6">
-                        <span className={`status-badge ${t.status === 'pago' ? 'status-pago' : 'status-pendente'}`}>
-                          {t.status}
-                        </span>
-                      </td>
-                      <td className="p-6">
-                        <button onClick={() => setTransactions(transactions.filter(x => x.id !== t.id))} className="text-gray-600 hover:text-red-400 transition-colors text-xl">
-                          <ion-icon name="trash-outline"></ion-icon>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const SummaryMini = ({ label, value, icon, color = "text-white" }) => (
-      <div className="glass-effect p-6 rounded-3xl flex justify-between items-center">
-        <div>
-          <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mb-1">{label}</p>
-          <p className={`text-xl font-black ${color}`}>{value}</p>
-        </div>
-        <ion-icon name={icon} style={{fontSize: '24px', opacity: 0.3}}></ion-icon>
-      </div>
-    );
-
-    const Goals = ({ goals, setGoals, formatCurrency }) => {
-      const [showModal, setShowModal] = useState(false);
-      const [editGoal, setEditGoal] = useState(null);
-
-      const handleSave = (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const data = {
-          id: editGoal ? editGoal.id : Date.now(),
-          name: fd.get('name'),
-          target: parseFloat(fd.get('target')),
-          current: parseFloat(fd.get('current') || 0)
-        };
-        if (editGoal) setGoals(goals.map(g => g.id === editGoal.id ? data : g));
-        else setGoals([...goals, data]);
-        setShowModal(false);
-        setEditGoal(null);
-      };
-
-      return (
-        <div className="space-y-8 fade-in">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xl font-bold italic">Gerir Objetivos</h3>
-            <button onClick={() => setShowModal(true)} className="gold-button px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-              <ion-icon name="add-outline"></ion-icon> Nova Meta
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {goals.map(g => (
-              <div key={g.id} className="glass-effect p-8 rounded-[2.5rem] border border-white/5 relative group">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="p-3 rounded-xl bg-yellow-500/10 text-yellow-500"><ion-icon name="flag" size="small"></ion-icon></div>
-                  <div className="flex gap-2">
-                    <button onClick={() => { setEditGoal(g); setShowModal(true); }} className="p-2 hover:bg-white/5 rounded-lg text-gray-500"><ion-icon name="create-outline"></ion-icon></button>
-                    <button onClick={() => setGoals(goals.filter(x => x.id !== g.id))} className="p-2 hover:bg-red-500/5 rounded-lg text-gray-500 hover:text-red-400"><ion-icon name="trash-outline"></ion-icon></button>
-                  </div>
-                </div>
-                <h4 className="font-bold text-lg mb-1">{g.name}</h4>
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black mb-6">Alvo: {formatCurrency(g.target)}</p>
-                
-                <div className="space-y-3">
-                   <div className="flex justify-between items-end">
-                      <span className="text-2xl font-black">{Math.round((g.current/g.target)*100)}%</span>
-                      <span className="text-[10px] font-bold text-gray-500">Saldo: {formatCurrency(g.current)}</span>
-                   </div>
-                   <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-yellow-600 to-yellow-300" style={{width: `${(g.current/g.target)*100}%`}}></div>
-                   </div>
-                </div>
+        <div className="md:col-span-2 glass p-8 rounded-[2rem]">
+          <h3 className="font-bold mb-6 italic">Fluxo de Caixa Semanal</h3>
+          <div className="h-40 flex items-end justify-between gap-2">
+            {[30, 60, 45, 90, 55, 75, 40].map((h, i) => (
+              <div key={i} className="flex-1 bg-white/5 rounded-lg relative group">
+                <div className="absolute bottom-0 w-full btn-gold rounded-lg transition-all" style={{height: `${h}%`}}></div>
               </div>
             ))}
           </div>
-
-          {showModal && (
-            <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-               <div className="glass-effect p-10 rounded-[2.5rem] w-full max-w-md border border-white/10 shadow-2xl">
-                  <h3 className="text-xl font-black mb-8 italic">{editGoal ? 'Editar Meta' : 'Nova Meta'}</h3>
-                  <form onSubmit={handleSave} className="space-y-5">
-                    <div className="space-y-1">
-                       <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-2">Título</label>
-                       <input name="name" defaultValue={editGoal?.name} className="w-full p-4 rounded-2xl outline-none" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                       <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-2">Alvo (R$)</label>
-                          <input name="target" type="number" defaultValue={editGoal?.target} className="w-full p-4 rounded-2xl outline-none" required />
-                       </div>
-                       <div className="space-y-1">
-                          <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-2">Já Tenho (R$)</label>
-                          <input name="current" type="number" defaultValue={editGoal?.current} className="w-full p-4 rounded-2xl outline-none" />
-                       </div>
-                    </div>
-                    <div className="flex gap-4 pt-4">
-                       <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-4 text-xs font-bold uppercase border border-white/10 rounded-2xl">Cancelar</button>
-                       <button type="submit" className="flex-1 py-4 gold-button text-xs font-black uppercase rounded-2xl">Confirmar</button>
-                    </div>
-                  </form>
-               </div>
-            </div>
-          )}
         </div>
-      );
-    };
 
-    const NewTransaction = ({ onAdd, setActiveTab }) => {
-      const [type, setType] = useState('expense');
-      const handleSubmit = (e) => {
+        <div className="glass p-8 rounded-[2rem]">
+          <h3 className="font-bold mb-4 italic">Alerta de Gastos</h3>
+          <div className="space-y-4">
+            <CategoryMini label="Lazer" p={85} />
+            <CategoryMini label="Alimentação" p={40} />
+            <CategoryMini label="Transporte" p={15} />
+          </div>
+        </div>
+      </div>
+    );
+
+    const StatCard = ({ title, value, color }) => (
+      <div className={`glass p-6 rounded-3xl border-l-4 ${color}`}>
+        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mb-1">{title}</p>
+        <p className="text-2xl font-black">{value}</p>
+      </div>
+    );
+
+    const CategoryMini = ({ label, p }) => (
+      <div className="space-y-1">
+        <div className="flex justify-between text-[9px] font-bold uppercase"><span>{label}</span><span>{p}%</span></div>
+        <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full btn-gold" style={{width: `${p}%`}}></div>
+        </div>
+      </div>
+    );
+
+    const SubscriptionsView = () => (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center"><h3 className="font-bold italic">Pagamentos Recorrentes</h3><button className="btn-gold px-4 py-2 rounded-xl text-[9px] uppercase">+ Novo</button></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <SubItem name="Netflix" price="€ 15,99" next="Dia 12" />
+          <SubItem name="Spotify" price="€ 10,99" next="Dia 20" />
+          <SubItem name="Academia" price="€ 35,00" next="Dia 01" />
+        </div>
+      </div>
+    );
+
+    const SubItem = ({ name, price, next }) => (
+      <div className="glass p-5 rounded-2xl flex justify-between items-center border border-white/5">
+        <div><p className="font-bold text-sm">{name}</p><p className="text-[10px] text-gray-500">{next}</p></div>
+        <p className="text-yellow-500 font-bold">{price}</p>
+      </div>
+    );
+
+    const DebtsView = () => (
+      <div className="glass p-8 rounded-[2rem] space-y-6">
+        <h3 className="font-bold italic">Controle de Quitação</h3>
+        <div className="p-6 bg-white/3 rounded-2xl border border-white/5">
+          <div className="flex justify-between mb-2"><span className="text-xs font-bold uppercase">Crédito Habitação</span><span className="text-yellow-500 text-xs font-bold">42% Pago</span></div>
+          <div className="h-3 bg-white/5 rounded-full overflow-hidden"><div className="h-full btn-gold w-[42%]"></div></div>
+          <div className="flex justify-between mt-4 text-[10px] text-gray-500 font-bold uppercase"><span>Pago: € 84.000</span><span>Total: € 200.000</span></div>
+        </div>
+      </div>
+    );
+
+    const PlanningView = () => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass p-8 rounded-[2rem]">
+          <h3 className="font-bold mb-4 italic">Previsão 6 Meses</h3>
+          <p className="text-3xl font-black text-emerald-500">+ € 5.100,00</p>
+          <p className="text-xs text-gray-500 mt-2">Baseado no seu histórico de poupança atual.</p>
+        </div>
+      </div>
+    );
+
+    const SettingsView = ({ user }) => (
+      <div className="max-w-xl glass p-8 rounded-[2rem] space-y-6">
+        <h3 className="font-bold italic">Definições da Conta</h3>
+        <div className="space-y-4">
+          <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center">
+             <span className="text-xs font-bold uppercase text-gray-500">E-mail</span>
+             <span className="text-xs font-bold">{user.email}</span>
+          </div>
+          <button className="w-full btn-gold py-4 rounded-xl text-[10px] uppercase">Alterar Senha</button>
+          <button className="w-full py-4 rounded-xl text-[10px] uppercase border border-white/10 hover:bg-white/5">Limpar Todos os Dados</button>
+        </div>
+      </div>
+    );
+
+    const ChartsView = () => (
+      <div className="glass p-10 rounded-[2.5rem] flex flex-col items-center justify-center min-h-[300px] text-center">
+        <ion-icon name="stats-chart-outline" style={{fontSize: '48px', color: '#bf953f'}}></ion-icon>
+        <h3 className="mt-4 font-bold italic">Gráficos Detalhados</h3>
+        <p className="text-xs text-gray-500 max-w-xs mt-2 uppercase tracking-widest font-bold">Módulo em processamento de dados históricos...</p>
+      </div>
+    );
+
+    const AuthPage = ({ onLogin }) => {
+      const [email, setEmail] = useState('');
+      const [pass, setPass] = useState('');
+      const handle = async (e) => {
         e.preventDefault();
-        const fd = new FormData(e.target);
-        onAdd({
-          id: Date.now(),
-          description: fd.get('desc'),
-          value: parseFloat(fd.get('val')),
-          type,
-          category: fd.get('cat'),
-          date: fd.get('date'),
-          status: 'pago'
-        });
-        setActiveTab('dashboard');
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+        if (error) await supabaseClient.auth.signUp({ email, password: pass });
+        else onLogin(data.user);
       };
-
       return (
-        <div className="max-w-2xl mx-auto glass-effect p-12 rounded-[3rem] fade-in shadow-2xl border border-white/5">
-           <h3 className="text-2xl font-black mb-10 italic text-center">Lançar Novo Registro</h3>
-           <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-2 p-1.5 glass-effect rounded-2xl border border-white/5">
-                <button type="button" onClick={() => setType('income')} className={`py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'income' ? 'gold-button shadow-lg shadow-yellow-500/20' : 'text-gray-500'}`}>Receita</button>
-                <button type="button" onClick={() => setType('expense')} className={`py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === 'expense' ? 'gold-button shadow-lg shadow-yellow-500/20' : 'text-gray-500'}`}>Despesa</button>
-              </div>
-
-              <div className="space-y-1">
-                 <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">O que é?</label>
-                 <input name="desc" placeholder="Ex: Mercado Mensal" className="w-full p-5 rounded-2xl outline-none border border-white/5" required />
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                 <div className="space-y-1">
-                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">Valor (R$)</label>
-                    <input name="val" type="number" step="0.01" placeholder="0,00" className="w-full p-5 rounded-2xl outline-none border border-white/5" required />
-                 </div>
-                 <div className="space-y-1">
-                    <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">Data</label>
-                    <input name="date" type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full p-5 rounded-2xl outline-none border border-white/5" required />
-                 </div>
-              </div>
-
-              <div className="space-y-1">
-                 <label className="text-[10px] text-gray-500 font-bold uppercase tracking-widest ml-4">Categoria</label>
-                 <select name="cat" className="w-full p-5 rounded-2xl outline-none border border-white/5 appearance-none">
-                    <option>Essencial</option><option>Lazer</option><option>Moradia</option><option>Transporte</option><option>Investimento</option>
-                 </select>
-              </div>
-
-              <button type="submit" className="gold-button w-full py-5 rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-2xl mt-4">Forjar Lançamento</button>
-           </form>
+        <div className="h-screen flex items-center justify-center p-6 bg-[#050505]">
+          <div className="glass p-10 rounded-[3rem] w-full max-w-sm text-center">
+            <h1 className="text-3xl font-black italic mb-2">Money<span className="gold-gradient">Forge</span></h1>
+            <p className="text-[9px] text-gray-500 font-bold uppercase tracking-[0.3em] mb-8">Gestão Financeira de Elite</p>
+            <form onSubmit={handle} className="space-y-3">
+              <input type="email" placeholder="E-mail" className="w-full p-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm" onChange={e => setEmail(e.target.value)} />
+              <input type="password" placeholder="Senha" className="w-full p-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm" onChange={e => setPass(e.target.value)} />
+              <button className="w-full btn-gold py-4 rounded-xl text-[10px] uppercase tracking-widest mt-4">Entrar na Forja</button>
+            </form>
+          </div>
         </div>
       );
     };
