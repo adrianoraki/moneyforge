@@ -35,31 +35,19 @@
       background: var(--dark-bg);
       color: #fff;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
     }
 
-    .app-viewport {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-    }
-
+    /* Background Engine */
     .background-engine {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000&auto=format&fit=crop');
+      background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2000&auto=format&fit=crop');
       background-size: cover;
       background-position: center;
       z-index: -1;
-      transform: scale(1.05);
-      filter: blur(1px);
     }
 
-    /* Auth Interface - Fully Responsive Card */
+    /* Auth Interface */
     .auth-container {
       width: 100%;
       max-width: 540px;
@@ -70,7 +58,6 @@
       border: 1px solid var(--glass-border);
       border-radius: clamp(1.5rem, 4vw, 3.5rem);
       box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(191, 149, 63, 0.05);
-      transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .gold-gradient-text {
@@ -88,7 +75,6 @@
       text-transform: uppercase;
       letter-spacing: 0.2em;
       margin-bottom: 8px;
-      margin-left: 4px;
     }
 
     .modern-input {
@@ -99,19 +85,16 @@
       padding: 16px 20px;
       color: #fff;
       font-size: 15px;
-      font-weight: 500;
       transition: all 0.4s ease;
     }
 
     .modern-input:focus {
       outline: none;
-      background: rgba(255, 255, 255, 0.07);
       border-color: var(--gold-primary);
-      box-shadow: 0 0 20px rgba(191, 149, 63, 0.15);
+      background: rgba(255, 255, 255, 0.07);
     }
 
     .btn-gold-action {
-      position: relative;
       width: 100%;
       padding: 18px;
       background: linear-gradient(180deg, var(--gold-secondary) 0%, var(--gold-primary) 100%);
@@ -123,19 +106,18 @@
       text-transform: uppercase;
       letter-spacing: 0.15em;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      transition: transform 0.3s;
     }
 
     .btn-gold-action:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(191, 149, 63, 0.35);
     }
 
-    /* Dashboard UI Elements */
+    /* Dashboard UI */
     .glass-panel {
       background: var(--glass-bg);
       backdrop-filter: blur(30px);
@@ -163,22 +145,16 @@
       color: var(--gold-secondary);
     }
 
-    /* Animations */
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.3); border-radius: 10px; }
+
     .reveal {
       animation: revealAnim 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     }
 
     @keyframes revealAnim {
-      from { opacity: 0; transform: translateY(20px); filter: blur(5px); }
-      to { opacity: 1; transform: translateY(0); filter: blur(0); }
-    }
-
-    .custom-scroll::-webkit-scrollbar { width: 4px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(191, 149, 63, 0.3); border-radius: 10px; }
-
-    @media (max-width: 768px) {
-      .sidebar-collapsed { display: none; }
-      .mobile-nav-toggle { display: block; }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -189,14 +165,16 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
+      // States
       const [isLoggedIn, setIsLoggedIn] = useState(false);
       const [authView, setAuthView] = useState('login'); // login | signup
       const [loading, setLoading] = useState(false);
       const [activeTab, setActiveTab] = useState('dashboard');
       const [transactions, setTransactions] = useState([]);
       const [showModal, setShowModal] = useState(null);
-      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      const [user, setUser] = useState({ firstName: 'Luis', plan: 'Membro Founder Elite' });
 
+      // Mock Data Initialization
       useEffect(() => {
         const initialData = [
           { id: 1, desc: 'Assinatura Adobe Creative', val: 124.90, type: 'expense', cat: 'Design', date: '18/03/2024' },
@@ -207,13 +185,14 @@
         setTransactions(initialData);
       }, []);
 
+      // Handlers
       const handleAuth = (e) => {
         e.preventDefault();
         setLoading(true);
         setTimeout(() => {
           setIsLoggedIn(true);
           setLoading(false);
-        }, 1200);
+        }, 1000);
       };
 
       const handleLogout = () => {
@@ -227,13 +206,12 @@
         return { total: income - expense, income, expense };
       }, [transactions]);
 
-      // --- AUTH VIEW ---
+      // --- LOGIN / SIGNUP SCREEN ---
       if (!isLoggedIn) {
         return (
-          <div className="app-viewport flex items-center justify-center p-4 sm:p-6 lg:p-10">
+          <div className="min-h-screen flex items-center justify-center p-4">
             <div className="background-engine"></div>
-            
-            <div className="auth-container reveal">
+            <div className="auth-container reveal w-full">
               <div className="text-center mb-10 sm:mb-14">
                 <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tighter mb-4 italic">
                   Money<span className="gold-gradient-text">Forge</span>
@@ -268,36 +246,19 @@
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="input-label mb-0">Senha de Segurança</label>
-                    {authView === 'login' && (
-                      <span className="text-[9px] font-bold text-white/30 cursor-pointer hover:text-white transition-colors">
-                        Esqueceu?
-                      </span>
-                    )}
+                    <label className="input-label mb-0">Senha</label>
                   </div>
-                  <div className="relative">
-                    <input type="password" className="modern-input" placeholder="••••••••" required />
-                    <button type="button" className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white">
-                      <ion-icon name="eye-outline"></ion-icon>
-                    </button>
-                  </div>
+                  <input type="password" className="modern-input" placeholder="••••••••" required />
                 </div>
 
-                <button type="submit" disabled={loading} className="btn-gold-action mt-6 sm:mt-10 group">
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <span>{authView === 'login' ? 'Entrar no Sistema' : 'Finalizar Registro Premium'}</span>
-                      <ion-icon name="arrow-forward" class="group-hover:translate-x-1 transition-transform"></ion-icon>
-                    </>
-                  )}
+                <button type="submit" disabled={loading} className="btn-gold-action mt-6 group">
+                  {loading ? "Processando..." : (authView === 'login' ? 'Entrar no Sistema' : 'Criar Conta Premium')}
                 </button>
               </form>
 
-              <div className="mt-12 sm:mt-16 text-center">
+              <div className="mt-12 text-center">
                 <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-3">
-                  {authView === 'login' ? 'Ainda não é membro?' : 'Já possui uma conta ativa?'}
+                  {authView === 'login' ? 'Ainda não é membro?' : 'Já possui acesso?'}
                 </p>
                 <button 
                   onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
@@ -311,28 +272,28 @@
         );
       }
 
-      // --- MAIN APP VIEW ---
+      // --- MAIN DASHBOARD VIEW ---
       return (
-        <div className="flex h-screen bg-[#050505] overflow-hidden p-0 md:p-6 gap-6">
-          <div className="background-engine opacity-30"></div>
+        <div className="flex h-screen bg-[#050505] overflow-hidden p-0 md:p-6 gap-6 relative">
+          <div className="background-engine opacity-20"></div>
           
-          {/* Sidebar - Desktop Only */}
-          <aside className="hidden lg:flex w-80 h-full glass-panel flex-col p-8 reveal">
+          {/* Sidebar */}
+          <aside className="hidden lg:flex w-80 h-full glass-panel flex-col p-8 reveal shrink-0">
             <div className="mb-12">
               <h2 className="text-2xl font-black italic tracking-tighter">Money<span className="gold-gradient-text">Forge</span></h2>
               <p className="text-[9px] text-white/20 font-bold uppercase tracking-[0.2em] mt-1">Intelligence Division</p>
             </div>
 
             <nav className="flex-1 space-y-1 overflow-y-auto custom-scroll">
-              <NavHeader title="Menu Principal" />
+              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">Menu Principal</p>
               <NavLink label="Dashboard" icon="grid-outline" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
               <NavLink label="Fluxo de Caixa" icon="swap-horizontal-outline" active={activeTab === 'transactions'} onClick={() => setActiveTab('transactions')} />
               
-              <NavHeader title="Estratégico" />
+              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">Estratégico</p>
               <NavLink label="Patrimônio" icon="trending-up-outline" active={activeTab === 'investments'} onClick={() => setActiveTab('investments')} />
               <NavLink label="Planejamento" icon="flag-outline" active={activeTab === 'goals'} onClick={() => setActiveTab('goals')} />
               
-              <NavHeader title="Sistema" />
+              <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">Sistema</p>
               <NavLink label="Configurações" icon="settings-outline" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
             </nav>
 
@@ -346,37 +307,42 @@
             </div>
           </aside>
 
-          {/* Main Content */}
-          <main className="flex-1 flex flex-col gap-4 sm:gap-6 h-full p-4 md:p-0 overflow-y-auto custom-scroll">
-            <header className="glass-panel p-5 sm:p-6 flex justify-between items-center reveal shrink-0">
+          {/* Content Area */}
+          <main className="flex-1 flex flex-col gap-6 h-full p-4 md:p-0 overflow-y-auto custom-scroll">
+            <header className="glass-panel p-6 flex justify-between items-center reveal shrink-0">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl btn-gold-action !w-12 !p-0 hidden sm:flex">LC</div>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/5 flex items-center justify-center font-bold text-gold-primary">
+                  {user.firstName.charAt(0)}
+                </div>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base tracking-tight"><span className="hidden sm:inline">Bem-vindo, </span>{userData.firstName}</h3>
-                  <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">{userData.plan}</p>
+                  <h3 className="font-bold text-sm sm:text-base tracking-tight">Bem-vindo, {user.firstName}</h3>
+                  <p className="text-[9px] text-white/30 font-bold uppercase tracking-widest">{user.plan}</p>
                 </div>
               </div>
-              <div className="flex gap-2 sm:gap-4">
-                <button onClick={() => setShowModal('tx')} className="btn-gold-action !py-2 sm:!py-3 px-4 sm:px-6 text-[9px] sm:text-[10px]">
-                  <ion-icon name="add"></ion-icon> <span className="hidden sm:inline">Lançar</span>
+              <div className="flex gap-4">
+                <button onClick={() => setShowModal('tx')} className="btn-gold-action !py-3 px-6 !w-auto text-[10px]">
+                  <ion-icon name="add"></ion-icon> Lançar
                 </button>
-                <button onClick={handleLogout} className="glass-panel lg:hidden p-3 text-red-500 border-none">
+                <button onClick={handleLogout} className="lg:hidden p-3 text-red-500 border border-red-500/20 rounded-2xl bg-red-500/5">
                   <ion-icon name="log-out-outline" style={{fontSize: '20px'}}></ion-icon>
                 </button>
               </div>
             </header>
 
-            <div className="flex-1 space-y-6">
+            <div className="flex-1">
               {activeTab === 'dashboard' ? (
-                <DashboardView stats={dashboardStats} transactions={transactions} />
+                <DashboardComponent stats={dashboardStats} transactions={transactions} />
               ) : (
-                <TransactionsView transactions={transactions} />
+                <div className="glass-panel p-10 reveal">
+                  <h3 className="text-xl font-black italic mb-8 uppercase tracking-widest">Seção: {activeTab}</h3>
+                  <p className="text-white/40">Módulo em desenvolvimento para sua conta premium.</p>
+                </div>
               )}
             </div>
           </main>
 
           {showModal === 'tx' && (
-            <NewTransactionModal 
+            <TransactionModal 
               onClose={() => setShowModal(null)} 
               onSave={(t) => {setTransactions([t, ...transactions]); setShowModal(null);}} 
             />
@@ -385,10 +351,7 @@
       );
     };
 
-    // Sub-Components
-    const NavHeader = ({ title }) => (
-      <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.3em] mt-8 mb-3 ml-4">{title}</p>
-    );
+    // --- SUBCOMPONENTS ---
 
     const NavLink = ({ label, icon, active, onClick }) => (
       <div onClick={onClick} className={`nav-link ${active ? 'active' : ''}`}>
@@ -397,45 +360,45 @@
       </div>
     );
 
-    const DashboardView = ({ stats, transactions }) => (
+    const DashboardComponent = ({ stats, transactions }) => (
       <div className="space-y-6 reveal pb-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          <StatPanel title="Disponível" value={stats.total} icon="wallet-outline" color="text-white" trend="+3.2%" />
-          <StatPanel title="Proventos" value={stats.income} icon="arrow-up-circle-outline" color="text-emerald-500" trend="+8.4%" />
-          <StatPanel title="Despesas" value={stats.expense} icon="arrow-down-circle-outline" color="text-red-500" trend="-1.2%" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          <StatCard title="Disponível" value={stats.total} icon="wallet-outline" color="text-white" trend="+3.2%" />
+          <StatCard title="Proventos" value={stats.income} icon="arrow-up-circle-outline" color="text-emerald-500" trend="+8.4%" />
+          <StatCard title="Despesas" value={stats.expense} icon="arrow-down-circle-outline" color="text-red-500" trend="-1.2%" />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-          <div className="xl:col-span-3 glass-panel p-6 sm:p-10 min-h-[350px]">
-             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-8">Fluxo Semestral</h4>
-             <ChartComponent />
+          <div className="xl:col-span-3 glass-panel p-10 h-[400px]">
+             <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-8">Performance Semestral</h4>
+             <FinancialChart />
           </div>
-          <div className="xl:col-span-2 glass-panel p-6 sm:p-10">
+          <div className="xl:col-span-2 glass-panel p-10">
              <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-8">Objetivos Estratégicos</h4>
              <div className="space-y-8">
-               <GoalItem label="Portfólio Global" progress={72} color="bg-gold-primary" />
-               <GoalItem label="Aposentadoria" progress={45} color="bg-blue-500" />
-               <GoalItem label="Reserva Offshore" progress={18} color="bg-emerald-500" />
+               <ProgressBar label="Liberdade Financeira" progress={72} color="bg-gold-primary" />
+               <ProgressBar label="Aposentadoria" progress={45} color="bg-blue-500" />
+               <ProgressBar label="Reserva de Ouro" progress={18} color="bg-emerald-500" />
              </div>
           </div>
         </div>
 
-        <div className="glass-panel p-6 sm:p-10">
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-6">Transações Recentes</h4>
-          <div className="space-y-3">
-            {transactions.map(t => (
-              <div key={t.id} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'income' ? 'text-emerald-500 bg-emerald-500/10' : 'text-white bg-white/5'}`}>
-                    <ion-icon name={t.type === 'income' ? 'add-outline' : 'remove-outline'}></ion-icon>
+        <div className="glass-panel p-10">
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-white/30 italic mb-8">Últimas Transações</h4>
+          <div className="space-y-4">
+            {transactions.slice(0, 5).map(t => (
+              <div key={t.id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:border-white/10 transition-all">
+                <div className="flex items-center gap-5">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg ${t.type === 'income' ? 'text-emerald-500 bg-emerald-500/10' : 'text-white bg-white/5'}`}>
+                    <ion-icon name={t.type === 'income' ? 'add-circle-outline' : 'remove-circle-outline'}></ion-icon>
                   </div>
                   <div>
-                    <p className="font-bold text-xs">{t.desc}</p>
-                    <p className="text-[9px] text-white/20 font-black uppercase">{t.cat}</p>
+                    <p className="font-bold text-sm">{t.desc}</p>
+                    <p className="text-[10px] text-white/20 font-black uppercase tracking-widest mt-1">{t.cat} • {t.date}</p>
                   </div>
                 </div>
-                <p className={`font-black text-sm ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                  R$ {t.val.toLocaleString('pt-BR')}
+                <p className={`font-black text-base ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
+                  {t.type === 'income' ? '+' : '-'} R$ {t.val.toLocaleString('pt-BR')}
                 </p>
               </div>
             ))}
@@ -444,43 +407,43 @@
       </div>
     );
 
-    const StatPanel = ({ title, value, icon, color, trend }) => (
-      <div className="glass-panel p-6 sm:p-8 hover:border-gold-primary/30 transition-all">
-        <div className="flex justify-between items-start mb-4">
-          <p className="text-[9px] text-white/30 font-black uppercase tracking-[0.2em]">{title}</p>
-          <div className={`text-xl opacity-30 ${color}`}><ion-icon name={icon}></ion-icon></div>
+    const StatCard = ({ title, value, icon, color, trend }) => (
+      <div className="glass-panel p-8 group hover:border-gold-primary/30 transition-all">
+        <div className="flex justify-between items-start mb-6">
+          <p className="text-[9px] text-white/30 font-black uppercase tracking-[0.3em]">{title}</p>
+          <div className={`text-2xl opacity-20 group-hover:opacity-100 transition-opacity ${color}`}><ion-icon name={icon}></ion-icon></div>
         </div>
         <div className="flex items-end justify-between">
-          <h3 className="text-2xl sm:text-3xl font-black tracking-tighter">R$ {value.toLocaleString('pt-BR')}</h3>
-          <span className={`text-[9px] font-black px-2 py-0.5 rounded-full bg-white/5 ${trend.startsWith('+') ? 'text-emerald-500' : 'text-red-500'}`}>{trend}</span>
+          <h3 className="text-3xl font-black tracking-tighter">R$ {value.toLocaleString('pt-BR')}</h3>
+          <span className={`text-[10px] font-black px-3 py-1 rounded-full bg-white/5 ${trend.startsWith('+') ? 'text-emerald-500' : 'text-red-500'}`}>{trend}</span>
         </div>
       </div>
     );
 
-    const GoalItem = ({ label, progress, color }) => (
+    const ProgressBar = ({ label, progress, color }) => (
       <div className="space-y-3">
-        <div className="flex justify-between text-[11px] font-bold">
+        <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest">
           <span>{label}</span>
           <span className="text-white/40">{progress}%</span>
         </div>
-        <div className="h-1 w-full bg-white/5 rounded-full">
-          <div className={`h-full ${color} rounded-full`} style={{width: `${progress}%`}}></div>
+        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+          <div className={`h-full ${color} rounded-full transition-all duration-1000`} style={{width: `${progress}%`}}></div>
         </div>
       </div>
     );
 
-    const ChartComponent = () => {
+    const FinancialChart = () => {
       const chartRef = useRef(null);
       useEffect(() => {
         const ctx = chartRef.current.getContext('2d');
         const chart = new Chart(ctx, {
           type: 'line',
           data: {
-            labels: ['1', '2', '3', '4', '5', '6'],
+            labels: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN'],
             datasets: [{
-              data: [12, 19, 15, 25, 22, 30],
+              data: [15000, 18500, 16200, 21000, 19800, 24500],
               borderColor: '#bf953f',
-              borderWidth: 3,
+              borderWidth: 4,
               tension: 0.4,
               pointRadius: 0,
               fill: true,
@@ -491,60 +454,50 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { x: { display: false }, y: { display: false } }
+            scales: { 
+              x: { grid: { display: false }, border: { display: false }, ticks: { color: 'rgba(255,255,255,0.2)', font: { size: 9, weight: '800' } } },
+              y: { display: false }
+            }
           }
         });
         return () => chart.destroy();
       }, []);
-      return <div className="h-48 sm:h-64"><canvas ref={chartRef}></canvas></div>;
+      return <div className="h-full w-full"><canvas ref={chartRef}></canvas></div>;
     };
 
-    const TransactionsView = ({ transactions }) => (
-      <div className="glass-panel p-6 sm:p-10 reveal">
-        <h3 className="text-xl font-black italic tracking-tighter mb-8 italic">Histórico de <span className="gold-gradient-text">Movimentações</span></h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[500px]">
-            <thead>
-              <tr className="border-b border-white/5 text-[10px] uppercase font-black tracking-widest text-white/20">
-                <th className="pb-4">Descrição</th>
-                <th className="pb-4">Categoria</th>
-                <th className="pb-4">Data</th>
-                <th className="pb-4 text-right">Valor</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 text-xs">
-              {transactions.map(t => (
-                <tr key={t.id} className="hover:bg-white/[0.02]">
-                  <td className="py-4 font-bold">{t.desc}</td>
-                  <td className="py-4"><span className="bg-white/5 px-3 py-1 rounded-full text-[9px] uppercase">{t.cat}</span></td>
-                  <td className="py-4 text-white/30">{t.date}</td>
-                  <td className={`py-4 text-right font-black ${t.type === 'income' ? 'text-emerald-500' : 'text-white'}`}>
-                    {t.type === 'income' ? '+' : '-'} R$ {t.val.toLocaleString('pt-BR')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-
-    const NewTransactionModal = ({ onClose, onSave }) => {
-      const [f, setF] = useState({ desc: '', val: '', type: 'expense', cat: 'Geral' });
+    const TransactionModal = ({ onClose, onSave }) => {
+      const [f, setF] = useState({ desc: '', val: '', type: 'expense', cat: 'Operacional' });
       return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
-          <div className="auth-container !max-w-md !p-8 sm:!p-12 reveal" onClick={e => e.stopPropagation()}>
-            <h3 className="text-xl font-black italic mb-8 tracking-tighter">Novo <span className="gold-gradient-text">Registro</span></h3>
-            <div className="space-y-4">
-              <input type="text" className="modern-input" placeholder="O que foi?" value={f.desc} onChange={e => setF({...f, desc: e.target.value})} />
-              <div className="grid grid-cols-2 gap-3">
-                <input type="number" className="modern-input" placeholder="Valor" value={f.val} onChange={e => setF({...f, val: e.target.value})} />
-                <select className="modern-input" value={f.type} onChange={e => setF({...f, type: e.target.value})}>
-                  <option value="expense">Saída</option>
-                  <option value="income">Entrada</option>
-                </select>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md" onClick={onClose}>
+          <div className="auth-container !max-w-md !p-12 reveal" onClick={e => e.stopPropagation()}>
+            <h3 className="text-xl font-black italic mb-10 tracking-tighter">Novo <span className="gold-gradient-text">Registro</span></h3>
+            <div className="space-y-5">
+              <div>
+                <label className="input-label">Descrição</label>
+                <input type="text" className="modern-input" placeholder="Ex: Compra de Ativo" value={f.desc} onChange={e => setF({...f, desc: e.target.value})} />
               </div>
-              <button className="btn-gold-action" onClick={() => onSave({ ...f, val: parseFloat(f.val), id: Date.now(), date: '18/03/24' })}>Confirmar</button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="input-label">Valor (R$)</label>
+                  <input type="number" className="modern-input" placeholder="0.00" value={f.val} onChange={e => setF({...f, val: e.target.value})} />
+                </div>
+                <div>
+                  <label className="input-label">Natureza</label>
+                  <select className="modern-input" value={f.type} onChange={e => setF({...f, type: e.target.value})}>
+                    <option value="expense">Saída</option>
+                    <option value="income">Entrada</option>
+                  </select>
+                </div>
+              </div>
+              <button 
+                className="btn-gold-action !mt-8" 
+                onClick={() => {
+                  if(!f.desc || !f.val) return;
+                  onSave({ ...f, val: parseFloat(f.val), id: Date.now(), date: '18/03/24' });
+                }}
+              >
+                Confirmar Lançamento
+              </button>
             </div>
           </div>
         </div>
