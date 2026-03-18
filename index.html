@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoneyForge - Gestão Financeira</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+  <!-- Supabase SDK (Única dependência de Backend agora) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #000; color: #fff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }
+    .gold-gradient { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="selection:bg-yellow-500/30">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo, useEffect } = React;
+
+    // --- CONFIGURAÇÃO SUPABASE ---
+    const SUPABASE_URL = "https://bicljinwvfmmjllnshcd.supabase.co"; 
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpY2xqaW53dmZtbWpsbG5zaGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4Mzc3MDcsImV4cCI6MjA4OTQxMzcwN30.4YbAXUNq79BueSwct3RYKRI0eNJ0pWxMzM_VGTlhz6Q";
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // --- COMPONENTES ---
+    const SummaryCard = ({ title, value, type }) => {
+        const styles = {
+            income: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5',
+            expense: 'text-rose-400 border-rose-500/20 bg-rose-500/5',
+            gold: 'text-yellow-500 border-yellow-500/20 bg-yellow-500/5'
+        };
+        return (
+            <div className={`p-6 rounded-3xl border ${styles[type]} transition-transform hover:scale-[1.02]`}>
+                <p className="text-[10px] uppercase tracking-widest font-black opacity-60 mb-2">{title}</p>
+                <p className="text-2xl font-black tracking-tighter">
+                    R$ {value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+            </div>
+        );
+    };
+
+    const TransactionItem = ({ t, onDelete }) => (
+        <div className="flex items-center justify-between p-4 bg-[#0a0a0a] border border-gray-900 rounded-2xl hover:border-gray-700 transition-all group fade-in">
+            <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                    <ion-icon name={t.type === 'income' ? 'arrow-up-outline' : 'arrow-down-outline'}></ion-icon>
+                </div>
+                <div>
+                    <p className="font-bold text-gray-200 text-sm">{t.description}</p>
+                    <p className="text-[10px] text-gray-500 uppercase font-bold">{t.category} • {t.date}</p>
+                </div>
+            </div>
+            <div className="flex items-center gap-4">
+                <p className={`font-black ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {t.type === 'income' ? '+' : '-'} R$ {parseFloat(t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+                <button onClick={() => onDelete(t.id)} className="text-gray-700 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100 p-2">
+                    <ion-icon name="trash-outline"></ion-icon>
+                </button>
+            </div>
+        </div>
+    );
+
+    // --- APLICAÇÃO ---
+    const App = () => {
+        const [user, setUser] = useState(null);
+        const [loading, setLoading] = useState(true);
+        const [transactions, setTransactions] = useState([]);
+        const [view, setView] = useState('dashboard');
+        const [filterMonth, setFilterMonth] = useState(new Date().toISOString().slice(0, 7));
+        const [authData, setAuthData] = useState({ email: '', password: '', isLogin: true });
+
+        // Observador de Sessão
+        useEffect(() => {
+            supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                setUser(session?.user ?? null);
+                setLoading(false);
+            });
+            const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+                setUser(session?.user ?? null);
+            });
+            return () => subscription.unsubscribe();
+        }, []);
+
+        // Carregar Transações
+        const fetchTransactions = async () => {
+            if (!user) return;
+            const { data, error } = await supabaseClient
+                .from('transactions')
+                .select('*')
+                .eq('userId', user.id)
+                .order('date', { ascending: false });
+            if (!error) setTransactions(data);
+        };
+
+        useEffect(() => {
+            fetchTransactions();
+            const channel = supabaseClient.channel('db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => fetchTransactions()).subscribe();
+            return () => supabaseClient.removeChannel(channel);
+        }, [user]);
+
+        // Autenticação
+        const handleAuth = async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            const { error } = authData.isLogin 
+                ? await supabaseClient.auth.signInWithPassword({ email: authData.email, password: authData.password })
+                : await supabaseClient.auth.signUp({ email: authData.email, password: authData.password });
+            
+            if (error) { alert(error.message); setLoading(false); }
+            else if (!authData.isLogin) { alert("Verifique o seu e-mail!"); setLoading(false); }
+        };
+
+        // Salvar Transação
+        const handleSave = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const entry = {
+                description: formData.get('desc'),
+                value: parseFloat(formData.get('val')),
+                type: formData.get('type'),
+                date: formData.get('date'),
+                category: formData.get('cat') || 'Geral',
+                userId: user.id
+            };
+            const { error } = await supabaseClient.from('transactions').insert([entry]);
+            if (!error) { e.target.reset(); setView('dashboard'); }
+            else alert("Erro ao guardar.");
+        };
+
+        const handleDelete = async (id) => {
+            await supabaseClient.from('transactions').delete().eq('id', id);
+        };
+
+        const stats = useMemo(() => {
+            return transactions.filter(t => t.date.startsWith(filterMonth)).reduce((acc, t) => {
+                const v = parseFloat(t.value);
+                if (t.type === 'income') acc.in += v; else acc.out += v;
+                return acc;
+            }, { in: 0, out: 0 });
+        }, [transactions, filterMonth]);
+
+        if (loading) return (
+            <div className="h-screen flex flex-col items-center justify-center bg-black">
+                <div className="w-8 h-8 border-2 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin mb-4"></div>
+                <p className="text-[10px] font-black tracking-[0.4em] text-yellow-600">MONEYFORGE</p>
+            </div>
+        );
+
+        if (!user) return (
+            <div className="min-h-screen flex items-center justify-center p-6 bg-[#050505]">
+                <div className="w-full max-w-sm bg-[#0a0a0a] border border-gray-900 p-10 rounded-[2.5rem] fade-in shadow-2xl">
+                    <h1 className="text-3xl font-black text-center mb-1">Money<span className="text-yellow-500">Forge</span></h1>
+                    <p className="text-[9px] text-gray-600 text-center mb-10 tracking-[0.3em] font-black uppercase">Financial Intelligence</p>
+                    <form className="space-y-4" onSubmit={handleAuth}>
+                        <input type="email" placeholder="E-mail" required className="w-full bg-[#111] border border-gray-800 p-4 rounded-2xl outline-none focus:border-yellow-600/50" onChange={e => setAuthData({...authData, email: e.target.value})} />
+                        <input type="password" placeholder="Palavra-passe" required className="w-full bg-[#111] border border-gray-800 p-4 rounded-2xl outline-none focus:border-yellow-600/50" onChange={e => setAuthData({...authData, password: e.target.value})} />
+                        <button className="w-full gold-gradient text-black font-black py-4 rounded-2xl shadow-lg shadow-yellow-600/10 hover:opacity-90 transition-opacity">
+                            {authData.isLogin ? 'ENTRAR' : 'REGISTAR'}
+                        </button>
+                        <p className="text-center text-[10px] text-gray-600 font-bold uppercase cursor-pointer hover:text-yellow-500 mt-4" onClick={() => setAuthData({...authData, isLogin: !authData.isLogin})}>
+                            {authData.isLogin ? "Criar nova conta" : "Já tenho conta"}
+                        </p>
+                    </form>
+                </div>
+            </div>
+        );
+
+        return (
+            <div className="flex h-screen overflow-hidden">
+                <aside className="hidden md:flex flex-col w-72 bg-[#050505] border-r border-gray-900 p-8">
+                    <h2 className="text-xl font-black mb-12">Money<span className="text-yellow-500">Forge</span></h2>
+                    <nav className="space-y-2 flex-1">
+                        {['dashboard', 'add', 'history'].map(item => (
+                            <button key={item} onClick={() => setView(item)} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${view === item ? 'bg-yellow-600/10 text-yellow-500 border border-yellow-600/20' : 'text-gray-500 hover:text-white'}`}>
+                                <ion-icon name={item === 'dashboard' ? 'grid-outline' : item === 'add' ? 'add-circle-outline' : 'list-outline'}></ion-icon>
+                                <span className="font-black text-[10px] uppercase tracking-widest">{item === 'history' ? 'Histórico' : item === 'add' ? 'Novo' : 'Início'}</span>
+                            </button>
+                        ))}
+                    </nav>
+                    <button onClick={() => supabaseClient.auth.signOut()} className="flex items-center gap-4 p-4 text-rose-500 font-black text-[10px] uppercase tracking-widest hover:bg-rose-500/5 rounded-2xl transition-all">
+                        <ion-icon name="log-out-outline"></ion-icon> Sair
+                    </button>
+                </aside>
+
+                <main className="flex-1 overflow-y-auto p-6 md:p-12">
+                    <header className="flex justify-between items-center mb-10">
+                        <div className="md:hidden text-xl text-yellow-500 font-black">MF</div>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600">{view}</h3>
+                        <input type="month" value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="bg-[#0a0a0a] border border-gray-800 rounded-xl px-4 py-2 text-xs font-bold [color-scheme:dark] outline-none"/>
+                    </header>
+
+                    {view === 'dashboard' && (
+                        <div className="space-y-8 fade-in">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                <SummaryCard title="Balanço" value={stats.in - stats.out} type="gold" />
+                                <SummaryCard title="Receitas" value={stats.in} type="income" />
+                                <SummaryCard title="Despesas" value={stats.out} type="expense" />
+                            </div>
+                            <div className="bg-[#0a0a0a] border border-gray-900 rounded-[2.5rem] p-8">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h4 className="text-[10px] uppercase tracking-widest font-black text-gray-600">Últimos Movimentos</h4>
+                                    <button onClick={() => setView('history')} className="text-[10px] text-yellow-500 font-black hover:underline">Ver tudo</button>
+                                </div>
+                                <div className="space-y-3">
+                                    {transactions.filter(t => t.date.startsWith(filterMonth)).slice(0, 4).map(t => (
+                                        <TransactionItem key={t.id} t={t} onDelete={handleDelete} />
+                                    ))}
+                                    {transactions.length === 0 && <p className="text-center py-10 text-gray-700 text-xs font-bold uppercase tracking-widest">Sem dados</p>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'add' && (
+                        <div className="max-w-xl mx-auto bg-[#0a0a0a] border border-gray-900 p-10 rounded-[3rem] fade-in">
+                            <h4 className="text-xl font-black mb-8 text-center uppercase tracking-widest">Novo Registro</h4>
+                            <form onSubmit={handleSave} className="space-y-4">
+                                <input name="desc" placeholder="Descrição" required className="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input name="val" type="number" step="0.01" placeholder="Valor" required className="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none" />
+                                    <select name="type" className="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none">
+                                        <option value="expense">Despesa</option>
+                                        <option value="income">Receita</option>
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input name="date" type="date" required className="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none [color-scheme:dark]" defaultValue={new Date().toISOString().split('T')[0]} />
+                                    <input name="cat" placeholder="Categoria" className="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none" />
+                                </div>
+                                <button type="submit" className="w-full gold-gradient text-black font-black py-5 rounded-2xl mt-4 shadow-xl shadow-yellow-600/10">ADICIONAR</button>
+                            </form>
+                        </div>
+                    )}
+
+                    {view === 'history' && (
+                        <div className="space-y-4 fade-in">
+                            {transactions.map(t => <TransactionItem key={t.id} t={t} onDelete={handleDelete} />)}
+                            {transactions.length === 0 && <p className="text-center py-20 text-gray-600 font-bold uppercase tracking-widest">Nada encontrado</p>}
+                        </div>
+                    )}
+                </main>
+            </div>
+        );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
